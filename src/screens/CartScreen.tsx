@@ -50,6 +50,9 @@ export default function CartScreen() {
     const [updatingQuantity, setUpdatingQuantity] = useState<string | null>(null);
     const [buyingNow, setBuyingNow] = useState(false);
 
+    // Estado temporal para edición de cantidades
+    const [tempQuantities, setTempQuantities] = useState<Record<string, string>>({});
+
     const fetchCart = async () => {
         if (!user) return;
         try {
@@ -124,14 +127,33 @@ export default function CartScreen() {
     const handleQuantityChange = async (productId: string, newQuantity: string) => {
         if (!user || !cartId) return;
 
-        // Validate numeric input
         const quantity = parseInt(newQuantity);
         if (isNaN(quantity) || quantity < 1) return;
 
         setUpdatingQuantity(productId);
 
+        const updatedCartData = cartData.map(item => {
+            if (item.product_id === productId) {
+                const newSubtotal = parseFloat(item.product_sort_price) * quantity;
+                return {
+                    ...item,
+                    cart_product_quantity: quantity.toString(),
+                    subtotal: newSubtotal.toFixed(2)
+                };
+            }
+            return item;
+        });
+
+        processCartData(updatedCartData);
+        setCartData(updatedCartData);
+
+        const newTotal = updatedCartData.reduce((sum, item) => {
+            return sum + parseFloat(item.subtotal || '0');
+        }, 0);
+        setTotalAmount(newTotal.toFixed(2));
+
         try {
-            const response = await axios.post('https://muitowork.com/api-tracking/actualizarcantidad.php', {
+            const response = await axios.post('https://muitowork.com/api-tracking/updatecart.php', {
                 keyhash: Config.KEY_HASH,
                 keyuser: user.keyuser,
                 product_id: productId,
@@ -140,17 +162,54 @@ export default function CartScreen() {
             });
 
             if (response.data && response.data.success) {
-                // Refresh cart to show updated data
                 fetchCart();
             } else {
                 Alert.alert('Error', response.data.message || 'No se pudo actualizar la cantidad');
+                fetchCart();
             }
         } catch (error) {
             console.error('Error updating quantity:', error);
             Alert.alert('Error', 'Falló la actualización de cantidad');
+            fetchCart();
         } finally {
             setUpdatingQuantity(null);
         }
+    };
+
+    // Manejar cambio temporal (permite borrar)
+    const handleTempQuantityChange = (productId: string, text: string) => {
+        const numericValue = text.replace(/[^0-9]/g, '');
+        setTempQuantities(prev => ({
+            ...prev,
+            [productId]: numericValue
+        }));
+    };
+
+    // Validar al perder foco
+    const handleQuantityBlur = (productId: string, originalQuantity: string) => {
+        const tempValue = tempQuantities[productId];
+
+        // Si está vacío o es inválido, restaurar valor original
+        if (!tempValue || parseInt(tempValue) < 1) {
+            setTempQuantities(prev => {
+                const newState = { ...prev };
+                delete newState[productId];
+                return newState;
+            });
+            return;
+        }
+
+        // Si cambió, actualizar en el servidor
+        if (tempValue !== originalQuantity) {
+            handleQuantityChange(productId, tempValue);
+        }
+
+        // Limpiar estado temporal
+        setTempQuantities(prev => {
+            const newState = { ...prev };
+            delete newState[productId];
+            return newState;
+        });
     };
 
     const handleDelete = (productId: string) => {
@@ -217,7 +276,6 @@ export default function CartScreen() {
 
             if (response.data && response.data.success) {
                 Alert.alert('Éxito', response.data.message || 'Compra realizada con éxito');
-                // Navigate to orders or clear cart
                 fetchCart();
             } else {
                 Alert.alert('Error', response.data.message || 'No se pudo completar la compra');
@@ -257,7 +315,6 @@ export default function CartScreen() {
                 ) : (
                     groupedCart.map((group) => (
                         <View key={group.product_code} style={styles.groupCard}>
-                            {/* Group Header - Clickable */}
                             <TouchableOpacity
                                 style={styles.groupHeader}
                                 onPress={() => handleProductPress(group.product_parent_id)}
@@ -274,7 +331,6 @@ export default function CartScreen() {
                                 </View>
                             </TouchableOpacity>
 
-                            {/* Variants List */}
                             <View style={styles.variantsList}>
                                 {group.items.map((item) => (
                                     <View key={item.cart_product_id} style={styles.variantRow}>
@@ -290,16 +346,16 @@ export default function CartScreen() {
                                         <View style={styles.actionsContainer}>
                                             <TextInput
                                                 style={styles.qtyInput}
-                                                value={item.cart_product_quantity}
+                                                value={
+                                                    tempQuantities[item.product_id] !== undefined
+                                                        ? tempQuantities[item.product_id]
+                                                        : item.cart_product_quantity
+                                                }
                                                 keyboardType="numeric"
                                                 maxLength={3}
-                                                onChangeText={(text) => {
-                                                    // Only allow numbers
-                                                    const numericValue = text.replace(/[^0-9]/g, '');
-                                                    if (numericValue && parseInt(numericValue) > 0) {
-                                                        handleQuantityChange(item.product_id, numericValue);
-                                                    }
-                                                }}
+                                                placeholder="0"
+                                                onChangeText={(text) => handleTempQuantityChange(item.product_id, text)}
+                                                onBlur={() => handleQuantityBlur(item.product_id, item.cart_product_quantity)}
                                                 editable={updatingQuantity !== item.product_id}
                                             />
 
@@ -319,7 +375,6 @@ export default function CartScreen() {
                 <View style={{ height: 100 }} />
             </ScrollView>
 
-            {/* Footer Button - Absolute Position like ProductDetailScreen */}
             {groupedCart.length > 0 && (
                 <View style={styles.footer}>
                     <TouchableOpacity
@@ -464,15 +519,14 @@ const styles = StyleSheet.create({
         borderColor: '#d1d5db',
         borderRadius: 6,
         textAlign: 'center',
-        textAlignVertical: 'center', // ← AÑADIR para Android
+        textAlignVertical: 'center',
         marginRight: 8,
         fontSize: 14,
         color: '#111827',
         backgroundColor: '#fff',
         paddingHorizontal: 4,
-        paddingVertical: 0, // ← AÑADIR para remover padding vertical
-        lineHeight: 16, // ← AÑADIR para mejor alineación
-        includeFontPadding: false, // ← AÑADIR (Android only)
+        paddingVertical: 0,
+        lineHeight: 16,
     },
     deleteButton: {
         padding: 6,
