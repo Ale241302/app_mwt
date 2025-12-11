@@ -3,8 +3,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import CartScreen from '../screens/CartScreen';
 import OrdersScreen from '../screens/OrdersScreen'; // Import the real screen
-import { CartScreen } from '../screens/Placeholders';
 import ProductsScreen from '../screens/ProductsScreen';
 
 const Tab = createBottomTabNavigator();
