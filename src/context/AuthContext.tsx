@@ -8,6 +8,7 @@ interface User {
     keyuser: string;
     name: string;
     email: string;
+    group_titles: string[];
 }
 
 interface AuthContextData {
@@ -48,8 +49,23 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
                 password: pass,
             });
 
+
             if (response.data.success) {
-                const userData = response.data.data;
+                const apiData = response.data.data;
+
+                // Extract group titles
+                const groupTitles = apiData.groups
+                    ? apiData.groups.map((g: any) => g.group_title)
+                    : [];
+
+                const userData: User = {
+                    id: apiData.id,
+                    keyuser: apiData.keyuser,
+                    name: apiData.name,
+                    email: apiData.email,
+                    group_titles: groupTitles
+                };
+
                 setUser(userData);
                 await AsyncStorage.setItem('@Auth:user', JSON.stringify(userData));
                 return { success: true };
