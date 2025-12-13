@@ -1,4 +1,5 @@
 import { Ionicons } from '@expo/vector-icons';
+import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Modal, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
@@ -33,6 +34,7 @@ const normalizeStatus = (status: string): string => {
 };
 
 export default function OrdersScreen() {
+    const navigation = useNavigation<any>();
     const { user } = useAuth();
     const { colors } = useTheme(); // Use Theme Context
     const styles = getStyles(colors); // Get dynamic styles
@@ -240,10 +242,16 @@ export default function OrdersScreen() {
                                             <View style={styles.cardHeader}>
                                                 <Text style={styles.orderNumber}>{order.order_number}</Text>
                                                 <View style={styles.icons}>
-                                                    <TouchableOpacity style={styles.iconButton}>
+                                                    <TouchableOpacity
+                                                        style={styles.iconButton}
+                                                        onPress={() => navigation.navigate('DetailWebView', { orderNumber: order.order_number })}
+                                                    >
                                                         <Ionicons name="search" size={20} color="#9ca3af" />
                                                     </TouchableOpacity>
-                                                    <TouchableOpacity style={styles.iconButton}>
+                                                    <TouchableOpacity
+                                                        style={styles.iconButton}
+                                                        onPress={() => navigation.navigate('OrderWebView', { orderNumber: order.order_number })}
+                                                    >
                                                         <Ionicons name="eye" size={20} color="#10b981" />
                                                     </TouchableOpacity>
                                                 </View>

@@ -3,7 +3,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import DetailWebViewScreen from '../screens/DetailWebViewScreen';
 import LoginScreen from '../screens/LoginScreen';
+import OrderWebViewScreen from '../screens/OrderWebViewScreen';
 import ProductDetailScreen from '../screens/ProductDetailScreen';
 import MainTabNavigator from './MainTabNavigator';
 
@@ -27,6 +29,8 @@ export default function RootNavigator() {
                     <>
                         <Stack.Screen name="Main" component={MainTabNavigator} />
                         <Stack.Screen name="ProductDetail" component={ProductDetailScreen} />
+                        <Stack.Screen name="OrderWebView" component={OrderWebViewScreen} />
+                        <Stack.Screen name="DetailWebView" component={DetailWebViewScreen} />
                     </>
                 ) : (
                     <Stack.Screen name="Login" component={LoginScreen} />
