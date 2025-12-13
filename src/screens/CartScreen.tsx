@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Dimensions, Image, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
 
@@ -40,7 +41,9 @@ interface GroupedCartItem {
 
 export default function CartScreen() {
     const { user } = useAuth();
-    const navigation = useNavigation();
+    const navigation = useNavigation<any>();
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
     const [cartData, setCartData] = useState<CartProduct[]>([]);
     const [groupedCart, setGroupedCart] = useState<GroupedCartItem[]>([]);
     const [loading, setLoading] = useState(true);
@@ -291,7 +294,7 @@ export default function CartScreen() {
     if (loading) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large" color="#10b981" />
+                <ActivityIndicator size="large" color={colors.primary} />
             </View>
         );
     }
@@ -309,7 +312,7 @@ export default function CartScreen() {
             >
                 {groupedCart.length === 0 ? (
                     <View style={styles.emptyContainer}>
-                        <Ionicons name="cart-outline" size={64} color="#ccc" />
+                        <Ionicons name="cart-outline" size={64} color={colors.subtext} />
                         <Text style={styles.emptyText}>Tu carrito está vacío</Text>
                     </View>
                 ) : (
@@ -323,7 +326,7 @@ export default function CartScreen() {
                                 <Image source={{ uri: group.product_image }} style={styles.groupImage} resizeMode="contain" />
                                 <View style={styles.groupInfo}>
                                     <Text style={styles.groupName}>{group.product_name}</Text>
-                                    <Text style={styles.groupCode}>{group.product_code}</Text>
+                                    <Text style={styles.groupCode}>SKU: {group.product_code}</Text>
                                     <View style={styles.groupStats}>
                                         <Text style={styles.groupStatText}>Cant Total: {group.total_quantity}</Text>
                                         <Text style={styles.groupStatText}>Subtotal: ${group.total_subtotal.toFixed(2)}</Text>
@@ -394,10 +397,10 @@ export default function CartScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f3f4f6',
+        backgroundColor: colors.background,
     },
     center: {
         flex: 1,
@@ -406,22 +409,22 @@ const styles = StyleSheet.create({
     },
     header: {
         padding: 20,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
         borderBottomWidth: 1,
-        borderBottomColor: '#e5e7eb',
+        borderBottomColor: colors.border,
     },
     headerTitle: {
         fontSize: 24,
         fontWeight: 'bold',
-        color: '#111827',
+        color: colors.text,
     },
     headerTotal: {
         fontSize: 18,
         fontWeight: 'bold',
-        color: '#10b981',
+        color: colors.primary,
     },
     scrollContent: {
         padding: 16,
@@ -434,10 +437,10 @@ const styles = StyleSheet.create({
     emptyText: {
         marginTop: 10,
         fontSize: 16,
-        color: '#6b7280',
+        color: colors.subtext,
     },
     groupCard: {
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderRadius: 12,
         marginBottom: 16,
         overflow: 'hidden',
@@ -450,15 +453,15 @@ const styles = StyleSheet.create({
     groupHeader: {
         flexDirection: 'row',
         padding: 12,
-        backgroundColor: '#f9fafb',
+        backgroundColor: colors.tint,
         borderBottomWidth: 1,
-        borderBottomColor: '#f3f4f6',
+        borderBottomColor: colors.border,
     },
     groupImage: {
         width: 60,
         height: 60,
         borderRadius: 8,
-        backgroundColor: '#fff',
+        backgroundColor: colors.background,
     },
     groupInfo: {
         flex: 1,
@@ -468,11 +471,11 @@ const styles = StyleSheet.create({
     groupName: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#1f2937',
+        color: colors.text,
     },
     groupCode: {
         fontSize: 12,
-        color: '#6b7280',
+        color: colors.subtext,
         marginBottom: 4,
     },
     groupStats: {
@@ -482,7 +485,7 @@ const styles = StyleSheet.create({
     groupStatText: {
         fontSize: 12,
         fontWeight: '600',
-        color: '#059669',
+        color: colors.primary,
     },
     variantsList: {
         padding: 12,
@@ -493,7 +496,7 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         paddingVertical: 8,
         borderBottomWidth: 1,
-        borderBottomColor: '#f3f4f6',
+        borderBottomColor: colors.border,
     },
     variantInfo: {
         flex: 1,
@@ -501,12 +504,12 @@ const styles = StyleSheet.create({
     },
     variantText: {
         fontSize: 14,
-        color: '#374151',
+        color: colors.text,
         marginBottom: 2,
     },
     variantSubtext: {
         fontSize: 12,
-        color: '#6b7280',
+        color: colors.subtext,
     },
     actionsContainer: {
         flexDirection: 'row',
@@ -516,14 +519,14 @@ const styles = StyleSheet.create({
         width: 50,
         height: 32,
         borderWidth: 1,
-        borderColor: '#d1d5db',
+        borderColor: colors.border,
         borderRadius: 6,
         textAlign: 'center',
         textAlignVertical: 'center',
         marginRight: 8,
         fontSize: 14,
-        color: '#111827',
-        backgroundColor: '#fff',
+        color: colors.text,
+        backgroundColor: colors.card,
         paddingHorizontal: 4,
         paddingVertical: 0,
         lineHeight: 16,
@@ -537,19 +540,20 @@ const styles = StyleSheet.create({
         left: 0,
         right: 0,
         padding: 15,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderTopWidth: 1,
-        borderTopColor: '#eee',
+        borderTopColor: colors.border,
         elevation: 10,
     },
     buyButton: {
-        backgroundColor: '#10b981',
+        backgroundColor: colors.primary,
         paddingVertical: 15,
         borderRadius: 25,
         alignItems: 'center',
     },
     buyButtonDisabled: {
-        backgroundColor: '#a7f3d0',
+        backgroundColor: '#a7f3d0', // Maybe use a lighter primary from palette if available, but hardcoded is ok for now or make opacity
+        opacity: 0.6,
     },
     buyButtonText: {
         color: '#fff',

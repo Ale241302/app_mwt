@@ -17,14 +17,34 @@ const LogoutComponent = () => {
     return <View style={{ flex: 1, backgroundColor: '#fff' }}><ActivityIndicator /></View>;
 };
 
+import ThemeToggle from '../components/ThemeToggle';
+import { useTheme } from '../context/ThemeContext';
+
 export default function MainTabNavigator() {
     const { user } = useAuth();
+    const { colors, theme } = useTheme();
 
     return (
         <Tab.Navigator
             screenOptions={({ route }) => ({
                 headerShown: true,
                 headerTitle: user ? `Hola, ${user.name}` : 'MuitoWork',
+                headerRight: () => <ThemeToggle />,
+                headerStyle: {
+                    backgroundColor: colors.card,
+                    shadowColor: 'transparent',
+                    elevation: 0,
+                },
+                headerTintColor: colors.text,
+                tabBarStyle: {
+                    backgroundColor: colors.card,
+                    borderTopColor: colors.border,
+                },
+                tabBarActiveTintColor: colors.primary,
+                tabBarInactiveTintColor: colors.subtext,
+                headerTitleStyle: {
+                    color: colors.text,
+                },
                 tabBarIcon: ({ focused, color, size }) => {
                     let iconName: keyof typeof Ionicons.glyphMap;
 
@@ -42,8 +62,6 @@ export default function MainTabNavigator() {
 
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
-                tabBarActiveTintColor: 'tomato',
-                tabBarInactiveTintColor: 'gray',
             })}
         >
             <Tab.Screen name="Pedidos" component={OrdersScreen} />

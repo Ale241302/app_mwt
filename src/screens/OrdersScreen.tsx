@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Modal, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 interface Order {
     order_id: string;
@@ -23,16 +24,18 @@ const normalizeStatus = (status: string): string => {
         'credito': 'Creación/Producción',
         'confirmed': 'Creación/Producción',
         'produccion': 'Creación/Producción',
-        'transito': 'Tránsito',
         'preparacion': 'Preparación/Despacho',
         'despacho': 'Preparación/Despacho',
-        'pagado': 'Pagado',
+        'transito': 'Tránsito',
+        'pagado': 'En Destino',
     };
     return normalized[status?.toLowerCase()] || 'Otros';
 };
 
 export default function OrdersScreen() {
     const { user } = useAuth();
+    const { colors } = useTheme(); // Use Theme Context
+    const styles = getStyles(colors); // Get dynamic styles
     const [orders, setOrders] = useState<Order[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
     const [loading, setLoading] = useState(true);
@@ -43,6 +46,17 @@ export default function OrdersScreen() {
     // Filter State
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
+    const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>([]);
+
+    const STATUS_FILTERS: Record<string, string[]> = {
+        'Creación': ['confirmed'],
+        'Crédito': ['credito'],
+        'Producción': ['produccion'],
+        'Preparación': ['preparacion'],
+        'Despacho': ['despacho'],
+        'Tránsito': ['transito'],
+        'En Destino': ['pagado'],
+    };
 
     const { width } = Dimensions.get('window');
 
@@ -104,8 +118,17 @@ export default function OrdersScreen() {
             );
         }
 
+        // 3. Status Filter
+        if (selectedStatusFilters.length > 0) {
+            // Flatten allowed raw statuses from selected filters
+            const allowedStatuses = selectedStatusFilters.flatMap(filter => STATUS_FILTERS[filter]);
+            result = result.filter(order =>
+                order.order_status && allowedStatuses.includes(order.order_status.toLowerCase())
+            );
+        }
+
         setFilteredOrders(result);
-    }, [search, orders, selectedCustomers]);
+    }, [search, orders, selectedCustomers, selectedStatusFilters]);
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -127,6 +150,14 @@ export default function OrdersScreen() {
         }
     };
 
+    const toggleStatusFilter = (filter: string) => {
+        if (selectedStatusFilters.includes(filter)) {
+            setSelectedStatusFilters(prev => prev.filter(s => s !== filter));
+        } else {
+            setSelectedStatusFilters(prev => [...prev, filter]);
+        }
+    };
+
     const getUniqueCustomers = () => {
         const customers = orders.map(o => o.cust_customer_name).filter(c => c);
         return Array.from(new Set(customers)).sort();
@@ -143,7 +174,7 @@ export default function OrdersScreen() {
     }, {} as Record<string, Order[]>);
 
     // Sort groups by custom order
-    const statusOrder = ['Creación/Producción', 'Preparación/Despacho', 'Tránsito', 'Pagado', 'Otros'];
+    const statusOrder = ['Creación/Producción', 'Preparación/Despacho', 'Tránsito', 'En Destino', 'Otros'];
     const sortedGroupKeys = Object.keys(groupedOrders).sort((a, b) => {
         const indexA = statusOrder.indexOf(a);
         const indexB = statusOrder.indexOf(b);
@@ -164,9 +195,10 @@ export default function OrdersScreen() {
         <View style={styles.mainContainer}>
             {/* Search Bar Fixed at Top */}
             <View style={styles.searchContainer}>
-                <Ionicons name="search" size={20} color="#666" style={{ marginRight: 10 }} />
+                <Ionicons name="search" size={20} color={colors.subtext} style={{ marginRight: 10 }} />
                 <TextInput
                     placeholder="Buscar pedido..."
+                    placeholderTextColor={colors.subtext}
                     style={styles.searchInput}
                     value={search}
                     onChangeText={setSearch}
@@ -197,7 +229,7 @@ export default function OrdersScreen() {
                                 <Ionicons
                                     name={isExpanded ? "remove" : "add"}
                                     size={24}
-                                    color="#0d1b2a"
+                                    color={colors.text}
                                 />
                             </TouchableOpacity>
 
@@ -209,21 +241,33 @@ export default function OrdersScreen() {
                                                 <Text style={styles.orderNumber}>{order.order_number}</Text>
                                                 <View style={styles.icons}>
                                                     <TouchableOpacity style={styles.iconButton}>
-                                                        <Ionicons name="search" size={18} color="#fff" />
+                                                        <Ionicons name="search" size={20} color="#9ca3af" />
                                                     </TouchableOpacity>
                                                     <TouchableOpacity style={styles.iconButton}>
-                                                        <Ionicons name="eye" size={18} color="#fff" />
+                                                        <Ionicons name="eye" size={20} color="#10b981" />
                                                     </TouchableOpacity>
                                                 </View>
                                             </View>
 
                                             <View style={styles.cardBody}>
-                                                <Text style={styles.textRow}><Text style={styles.label}>OC: </Text>{order.preforma_number_purchase}</Text>
-                                                <Text style={styles.textRow}><Text style={styles.label}>SAP: </Text>{order.sap_number_preformar}</Text>
-                                                <Text style={styles.textRow}><Text style={styles.label}>Preforma Muito Work Limitida: </Text>{order.sap_number_preforma_mwt}</Text>
-                                                <Text style={styles.textRow}><Text style={styles.label}>Preforma: </Text>{order.sap_number_preforma}</Text>
-                                                <Text style={styles.textRow}><Text style={styles.label}>Producción: </Text>{order.prod_fechai}</Text>
-                                                <Text style={styles.textRow}><Text style={styles.label}>Cliente: </Text>{order.cust_customer_name}</Text>
+                                                {order.preforma_number_purchase && order.preforma_number_purchase !== 'null' && (
+                                                    <Text style={styles.textRow}><Text style={styles.label}>OC: </Text>{order.preforma_number_purchase}</Text>
+                                                )}
+                                                {order.sap_number_preformar && order.sap_number_preformar !== 'null' && (
+                                                    <Text style={styles.textRow}><Text style={styles.label}>SAP: </Text>{order.sap_number_preformar}</Text>
+                                                )}
+                                                {order.sap_number_preforma_mwt && order.sap_number_preforma_mwt !== 'null' && (
+                                                    <Text style={styles.textRow}><Text style={styles.label}>Proforma Muito Work: </Text>{order.sap_number_preforma_mwt}</Text>
+                                                )}
+                                                {order.sap_number_preforma && order.sap_number_preforma !== 'null' && (
+                                                    <Text style={styles.textRow}><Text style={styles.label}>Proforma: </Text>{order.sap_number_preforma}</Text>
+                                                )}
+                                                {order.prod_fechai && order.prod_fechai !== 'null' && (
+                                                    <Text style={styles.textRow}><Text style={styles.label}>Producción: </Text>{order.prod_fechai}</Text>
+                                                )}
+                                                {order.cust_customer_name && order.cust_customer_name !== 'null' && (
+                                                    <Text style={styles.textRow}><Text style={styles.label}>Cliente: </Text>{order.cust_customer_name}</Text>
+                                                )}
                                             </View>
                                         </View>
                                     ))}
@@ -252,8 +296,27 @@ export default function OrdersScreen() {
                             </TouchableOpacity>
                         </View>
 
-                        <Text style={styles.filterCategoryTitle}>Clientes</Text>
                         <ScrollView style={styles.filterScroll} showsVerticalScrollIndicator={false}>
+                            <Text style={styles.filterCategoryTitle}>Estados</Text>
+                            <View style={{ marginBottom: 20 }}>
+                                {Object.keys(STATUS_FILTERS).map(filter => {
+                                    const isChecked = selectedStatusFilters.includes(filter);
+                                    return (
+                                        <TouchableOpacity
+                                            key={filter}
+                                            style={styles.filterOption}
+                                            onPress={() => toggleStatusFilter(filter)}
+                                        >
+                                            <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
+                                                {isChecked && <Ionicons name="checkmark" size={14} color="#fff" />}
+                                            </View>
+                                            <Text style={styles.filterOptionText}>{filter}</Text>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
+
+                            <Text style={styles.filterCategoryTitle}>Clientes</Text>
                             {getUniqueCustomers().map(customer => {
                                 const isChecked = selectedCustomers.includes(customer);
                                 return (
@@ -269,6 +332,7 @@ export default function OrdersScreen() {
                                     </TouchableOpacity>
                                 );
                             })}
+                            <View style={{ height: 40 }} />
                         </ScrollView>
                     </View>
                 </View>
@@ -277,16 +341,16 @@ export default function OrdersScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     mainContainer: {
         flex: 1,
-        backgroundColor: '#f5f5f5',
+        backgroundColor: colors.background,
     },
     scrollContainer: {
         flex: 1,
     },
     scrollContent: {
-        padding: 10,
+        padding: 16,
     },
     center: {
         flex: 1,
@@ -296,10 +360,10 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff',
-        margin: 10,
+        backgroundColor: colors.card,
+        margin: 16,
         paddingHorizontal: 15,
-        borderRadius: 25,
+        borderRadius: 12,
         height: 50,
         elevation: 2,
         shadowColor: '#000',
@@ -311,69 +375,70 @@ const styles = StyleSheet.create({
         flex: 1,
         height: '100%',
         fontSize: 16,
+        color: colors.text,
     },
     sectionContainer: {
-        backgroundColor: '#26d0ce',
-        borderRadius: 15,
-        padding: 10,
-        marginBottom: 20,
-        elevation: 3,
-        shadowColor: '#000',
-        shadowOffset: { width: 0, height: 2 },
-        shadowOpacity: 0.1,
-        shadowRadius: 4,
+        marginBottom: 24,
     },
     sectionCollapsed: {
-        height: null,
-        paddingBottom: 10,
+        marginBottom: 10,
     },
     sectionHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        paddingVertical: 5,
-        marginBottom: 5,
+        paddingVertical: 8,
+        paddingHorizontal: 4,
+        marginBottom: 8,
     },
     sectionTitle: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: 'bold',
-        color: '#0d1b2a',
+        color: colors.text,
     },
     cardsContainer: {
-        gap: 10,
-        marginTop: 5,
+        gap: 12,
     },
     card: {
-        backgroundColor: '#0d1b2a',
-        borderRadius: 10,
-        padding: 15,
+        backgroundColor: colors.card,
+        borderRadius: 12,
+        padding: 16,
+        shadowColor: '#000',
+        shadowOffset: { width: 0, height: 1 },
+        shadowOpacity: 0.1,
+        shadowRadius: 3,
+        elevation: 2,
     },
     cardHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 10,
+        marginBottom: 12,
+        paddingBottom: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
     },
     orderNumber: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#fff',
+        color: colors.text,
     },
     icons: {
         flexDirection: 'row',
     },
     iconButton: {
-        marginLeft: 10,
+        marginLeft: 12,
+        padding: 4,
     },
     cardBody: {},
     textRow: {
-        color: '#fff',
+        color: colors.subtext,
         fontSize: 14,
-        marginBottom: 4,
+        marginBottom: 6,
     },
     label: {
-        fontWeight: 'bold',
-        color: '#e0e0e0',
+        fontWeight: '600',
+        color: colors.subtext,
     },
     modalOverlay: {
         flex: 1,
@@ -386,28 +451,37 @@ const styles = StyleSheet.create({
     },
     sideMenu: {
         height: '100%',
-        backgroundColor: '#fff',
-        padding: 20,
+        backgroundColor: colors.card,
+        padding: 24,
+        shadowColor: "#000",
+        shadowOffset: {
+            width: -2,
+            height: 0,
+        },
+        shadowOpacity: 0.25,
+        shadowRadius: 3.84,
+        elevation: 5,
     },
     sideMenuHeader: {
         flexDirection: 'row',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: 20,
+        marginBottom: 24,
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
-        paddingBottom: 10,
+        borderBottomColor: colors.border,
+        paddingBottom: 16,
     },
     sideMenuTitle: {
-        fontSize: 20,
+        fontSize: 22,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
     },
     filterCategoryTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#26d0ce',
-        marginBottom: 10,
+        color: colors.primary,
+        marginBottom: 12,
+        marginTop: 8,
     },
     filterScroll: {
         flex: 1,
@@ -415,24 +489,24 @@ const styles = StyleSheet.create({
     filterOption: {
         flexDirection: 'row',
         alignItems: 'center',
-        marginBottom: 8,
+        paddingVertical: 8,
     },
     checkbox: {
-        width: 20,
-        height: 20,
+        width: 22,
+        height: 22,
         borderWidth: 2,
-        borderColor: '#ccc',
-        borderRadius: 4,
-        marginRight: 10,
+        borderColor: colors.border,
+        borderRadius: 6,
+        marginRight: 12,
         justifyContent: 'center',
         alignItems: 'center',
     },
     checkboxChecked: {
-        backgroundColor: '#10b981',
-        borderColor: '#10b981',
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
     },
     filterOptionText: {
-        fontSize: 14,
-        color: '#555',
+        fontSize: 15,
+        color: colors.subtext,
     },
 });

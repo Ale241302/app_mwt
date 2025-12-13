@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
 
 const { width, height } = Dimensions.get('window');
 const COLUMN_COUNT = 2;
@@ -15,19 +16,25 @@ interface ProductFile {
     file_type: string;
 }
 
+interface ProductAttribute {
+    text: string;
+    image_url: string | null;
+    class: string | null;
+}
+
 interface Product {
     product_id: string;
     product_name: string;
     product_code: string;
     product_sort_price: string;
-    product_calzado?: string;
-    product_capellado?: string;
-    product_plantilla?: string;
-    product_puntera?: string;
-    product_disipativo?: string;
-    product_segmento?: string;
-    product_riesgo?: string;
-    product_suela?: string;
+    product_calzado?: ProductAttribute[];
+    product_capellado?: ProductAttribute[];
+    product_plantilla?: ProductAttribute[];
+    product_puntera?: ProductAttribute[];
+    product_disipativo?: ProductAttribute[];
+    product_segmento?: ProductAttribute[];
+    producrt_riesgo?: ProductAttribute[]; // Note: matching JSON key 'producrt_riesgo'
+    product_suela?: ProductAttribute[];
     files: ProductFile[];
 }
 
@@ -37,13 +44,15 @@ const FILTER_CATEGORIES = [
     { label: 'Calzados', key: 'product_calzado' },
     { label: 'Capellada', key: 'product_capellado' },
     { label: 'Punteras', key: 'product_puntera' },
-    { label: 'Riesgos', key: 'product_riesgo' },
+    { label: 'Riesgos', key: 'producrt_riesgo' }, // Fixed key to match JSON
     { label: 'Suela', key: 'product_suela' },
 ];
 
 export default function ProductsScreen() {
     const navigation = useNavigation<any>();
     const { user } = useAuth();
+    const { colors } = useTheme();
+    const styles = getStyles(colors);
     const [products, setProducts] = useState<Product[]>([]);
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
@@ -80,6 +89,11 @@ export default function ProductsScreen() {
         }
     };
 
+    const getAttributeText = (attr: ProductAttribute[] | undefined) => {
+        if (!attr || !Array.isArray(attr) || attr.length === 0) return '';
+        return attr[0].text || '';
+    };
+
     const applyFilters = () => {
         let result = products;
 
@@ -93,17 +107,16 @@ export default function ProductsScreen() {
         }
 
         // 2. Category Filters
-        // If any checkbox is selected in a category, the product must match one of the selected values (OR logic within category).
-        // It must match across categories (AND logic between categories).
         Object.keys(selectedFilters).forEach(key => {
             const selectedValues = selectedFilters[key];
             if (selectedValues.length > 0) {
                 result = result.filter(p => {
                     // @ts-ignore - dynamic key access
-                    const productValue = p[key];
-                    if (!productValue) return false;
-                    // Exact match logic. Some fields might be comma separated in future, but assuming exact for now.
-                    return selectedValues.includes(productValue);
+                    const productAttrs = p[key] as ProductAttribute[] | undefined;
+                    if (!productAttrs || !Array.isArray(productAttrs)) return false;
+
+                    // Check if any of the product's attribute texts are in the selected values
+                    return productAttrs.some(attr => selectedValues.includes(attr.text));
                 });
             }
         });
@@ -123,14 +136,28 @@ export default function ProductsScreen() {
     };
 
     const getUniqueValues = (key: string) => {
-        // @ts-ignore
-        const values = products.map(p => p[key]).filter(v => v); // filter null/undefined/empty
-        return Array.from(new Set(values));
+        const allValues = products.flatMap(p => {
+            // @ts-ignore
+            const val = p[key] as ProductAttribute[] | undefined;
+            if (Array.isArray(val)) return val.map(v => v.text);
+            return [];
+        });
+        return Array.from(new Set(allValues.filter(v => v))).sort();
+    };
+
+    const getAttributeImage = (attr: ProductAttribute[] | undefined) => {
+        if (!attr || !Array.isArray(attr) || attr.length === 0) return null;
+        return attr[0].image_url;
     };
 
     const renderItem = ({ item }: { item: Product }) => {
         const imageFile = item.files?.find(f => f.file_type === 'product' || f.file_type === 'file');
         const imageUrl = imageFile ? imageFile.file_url : 'https://via.placeholder.com/150';
+
+        const calzadoImg = getAttributeImage(item.product_calzado);
+        const capelladoImg = getAttributeImage(item.product_capellado);
+        const punteraImg = getAttributeImage(item.product_puntera);
+        const suelaImg = getAttributeImage(item.product_suela);
 
         return (
             <TouchableOpacity
@@ -145,8 +172,28 @@ export default function ProductsScreen() {
                     <Text style={styles.nameText} numberOfLines={2}>{item.product_name}</Text>
                     <Text style={styles.codeText}>SKU: {item.product_code}</Text>
 
-                    {item.product_calzado ? <Text style={styles.detailText} numberOfLines={1}>{item.product_calzado}</Text> : null}
-                    {item.product_capellado ? <Text style={styles.detailText} numberOfLines={1}>{item.product_capellado}</Text> : null}
+                    <View style={styles.iconRow}>
+                        {calzadoImg && (
+                            <View style={styles.iconWrapper}>
+                                <Image source={{ uri: calzadoImg }} style={styles.attributeIcon} resizeMode="contain" />
+                            </View>
+                        )}
+                        {capelladoImg && (
+                            <View style={styles.iconWrapper}>
+                                <Image source={{ uri: capelladoImg }} style={styles.attributeIcon} resizeMode="contain" />
+                            </View>
+                        )}
+                        {punteraImg && (
+                            <View style={styles.iconWrapper}>
+                                <Image source={{ uri: punteraImg }} style={styles.attributeIcon} resizeMode="contain" />
+                            </View>
+                        )}
+                        {suelaImg && (
+                            <View style={styles.iconWrapper}>
+                                <Image source={{ uri: suelaImg }} style={styles.attributeIcon} resizeMode="contain" />
+                            </View>
+                        )}
+                    </View>
 
                     <View style={styles.footerRow}>
                         {item.product_sort_price && (
@@ -177,15 +224,16 @@ export default function ProductsScreen() {
         <View style={styles.container}>
             {/* Search Bar */}
             <View style={styles.searchContainer}>
-                <Ionicons name="search" size={20} color="#666" style={{ marginRight: 10 }} />
+                <Ionicons name="search" size={20} color={colors.subtext} style={{ marginRight: 10 }} />
                 <TextInput
                     placeholder="Buscar productos..."
+                    placeholderTextColor={colors.subtext}
                     style={styles.searchInput}
                     value={search}
                     onChangeText={setSearch}
                 />
                 <TouchableOpacity onPress={() => setModalVisible(true)}>
-                    <Ionicons name="filter" size={24} color="#10b981" />
+                    <Ionicons name="filter" size={24} color={colors.primary} />
                 </TouchableOpacity>
             </View>
 
@@ -216,7 +264,7 @@ export default function ProductsScreen() {
                         <View style={styles.sideMenuHeader}>
                             <Text style={styles.sideMenuTitle}>Filtrar por</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
-                                <Ionicons name="close" size={24} color="#333" />
+                                <Ionicons name="close" size={24} color={colors.text} />
                             </TouchableOpacity>
                         </View>
 
@@ -255,10 +303,10 @@ export default function ProductsScreen() {
     );
 }
 
-const styles = StyleSheet.create({
+const getStyles = (colors: any) => StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: '#f8f9fa',
+        backgroundColor: colors.background,
     },
     center: {
         flex: 1,
@@ -268,7 +316,7 @@ const styles = StyleSheet.create({
     searchContainer: {
         flexDirection: 'row',
         alignItems: 'center',
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         margin: 10,
         paddingHorizontal: 15,
         borderRadius: 25,
@@ -283,6 +331,7 @@ const styles = StyleSheet.create({
         flex: 1,
         height: '100%',
         fontSize: 16,
+        color: colors.text,
     },
     listContent: {
         paddingHorizontal: 10,
@@ -294,7 +343,7 @@ const styles = StyleSheet.create({
     },
     card: {
         width: CARD_WIDTH,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         borderRadius: 12,
         overflow: 'hidden',
         elevation: 3,
@@ -307,7 +356,7 @@ const styles = StyleSheet.create({
     },
     imageContainer: {
         height: 140,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         justifyContent: 'center',
         alignItems: 'center',
         padding: 10,
@@ -318,26 +367,47 @@ const styles = StyleSheet.create({
     },
     infoContainer: {
         padding: 10,
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         flex: 1,
         justifyContent: 'space-between',
     },
     nameText: {
         fontSize: 14,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
         marginBottom: 4,
     },
     codeText: {
         fontSize: 12,
         fontWeight: '400',
-        color: '#666',
+        color: colors.subtext,
         marginBottom: 4,
     },
     detailText: {
         fontSize: 12,
-        color: '#888',
+        color: colors.subtext,
         marginBottom: 2,
+    },
+    iconRow: {
+        flexDirection: 'row',
+        marginTop: 5,
+        marginBottom: 5,
+        alignItems: 'center',
+    },
+    attributeIcon: {
+        width: 18,
+        height: 18,
+    },
+    iconWrapper: {
+        width: 26,
+        height: 26,
+        marginRight: 4,
+        justifyContent: 'center',
+        alignItems: 'center',
+        backgroundColor: '#fff',
+        borderRadius: 4,
+        borderWidth: 1,
+        borderColor: colors.border,
     },
     footerRow: {
         flexDirection: 'row',
@@ -348,10 +418,10 @@ const styles = StyleSheet.create({
     price: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#10b981',
+        color: colors.primary,
     },
     viewButton: {
-        backgroundColor: '#10b981',
+        backgroundColor: colors.primary,
         flexDirection: 'row',
         alignItems: 'center',
         paddingVertical: 6,
@@ -377,7 +447,7 @@ const styles = StyleSheet.create({
     sideMenu: {
         width: width * 0.75, // 75% width side menu
         height: '100%',
-        backgroundColor: '#fff',
+        backgroundColor: colors.card,
         padding: 20,
     },
     sideMenuHeader: {
@@ -386,13 +456,13 @@ const styles = StyleSheet.create({
         alignItems: 'center',
         marginBottom: 20,
         borderBottomWidth: 1,
-        borderBottomColor: '#eee',
+        borderBottomColor: colors.border,
         paddingBottom: 10,
     },
     sideMenuTitle: {
         fontSize: 20,
         fontWeight: 'bold',
-        color: '#333',
+        color: colors.text,
     },
     filterScroll: {
         flex: 1,
@@ -403,7 +473,7 @@ const styles = StyleSheet.create({
     filterCategoryTitle: {
         fontSize: 16,
         fontWeight: 'bold',
-        color: '#26d0ce',
+        color: colors.primary,
         marginBottom: 10,
     },
     filterOption: {
@@ -415,18 +485,18 @@ const styles = StyleSheet.create({
         width: 20,
         height: 20,
         borderWidth: 2,
-        borderColor: '#ccc',
+        borderColor: colors.border,
         borderRadius: 4,
         marginRight: 10,
         justifyContent: 'center',
         alignItems: 'center',
     },
     checkboxChecked: {
-        backgroundColor: '#10b981',
-        borderColor: '#10b981',
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
     },
     filterOptionText: {
         fontSize: 14,
-        color: '#555',
+        color: colors.subtext,
     },
 });
