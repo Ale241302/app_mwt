@@ -5,15 +5,16 @@ import { WebView } from 'react-native-webview';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
-export default function OrderWebViewScreen({ route, navigation }: any) {
-    const { orderNumber } = route.params;
+export default function DashboardWebViewScreen({ route, navigation }: any) {
+    // orderNumber is optional - only used if navigating from OrdersScreen
+    const orderNumber = route?.params?.orderNumber;
     const { colors } = useTheme();
     const { user } = useAuth();
     const styles = getStyles(colors);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
 
-    const webViewUrl = `https://mwt.one/es/?option=com_sppagebuilder&view=page&id=84&order_number=${orderNumber}&user_id=${user?.id || ''}`;
+    const webViewUrl = `https://mwt.one/es/?option=com_sppagebuilder&view=page&id=90&user_id=${user?.id || ''}`;
 
     // JavaScript para ocultar el header y footer de forma más agresiva
     const hideHeaderScript = `
@@ -61,16 +62,18 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
 
     return (
         <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle} numberOfLines={1}>
-                    Detalle: {orderNumber}
-                </Text>
-                <View style={{ width: 24 }} />
-            </View>
+            {/* Header - only show if navigated from somewhere (not from tab) */}
+            {orderNumber && (
+                <View style={styles.header}>
+                    <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                        <Ionicons name="arrow-back" size={24} color={colors.text} />
+                    </TouchableOpacity>
+                    <Text style={styles.headerTitle} numberOfLines={1}>
+                        Rastreo: {orderNumber}
+                    </Text>
+                    <View style={{ width: 24 }} />
+                </View>
+            )}
 
             {/* WebView */}
             <WebView
@@ -119,7 +122,7 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
                     <Text style={styles.loadingText}>Cargando...</Text>
                 </View>
             )}
-        </View>
+        </View >
     );
 }
 

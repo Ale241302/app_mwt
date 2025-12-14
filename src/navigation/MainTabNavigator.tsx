@@ -4,6 +4,7 @@ import React from 'react';
 import { ActivityIndicator, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
 import CartScreen from '../screens/CartScreen';
+import DashboardWebViewScreen from '../screens/DashboardWebViewScreen';
 import OrdersScreen from '../screens/OrdersScreen'; // Import the real screen
 import ProductsScreen from '../screens/ProductsScreen';
 
@@ -17,6 +18,7 @@ const LogoutComponent = () => {
     return <View style={{ flex: 1, backgroundColor: '#fff' }}><ActivityIndicator /></View>;
 };
 
+import DashboardIcon from '../components/DashboardIcon';
 import ThemeToggle from '../components/ThemeToggle';
 import { useTheme } from '../context/ThemeContext';
 
@@ -46,6 +48,11 @@ export default function MainTabNavigator() {
                     color: colors.text,
                 },
                 tabBarIcon: ({ focused, color, size }) => {
+                    // Special case for Dashboard - use custom SVG icon
+                    if (route.name === 'Dashboard') {
+                        return <DashboardIcon size={size} color={color} focused={focused} />;
+                    }
+
                     let iconName: keyof typeof Ionicons.glyphMap;
 
                     if (route.name === 'Pedidos') {
@@ -66,6 +73,10 @@ export default function MainTabNavigator() {
         >
             <Tab.Screen name="Pedidos" component={OrdersScreen} />
             <Tab.Screen name="Productos" component={ProductsScreen} />
+            <Tab.Screen
+                name="Dashboard"
+                component={DashboardWebViewScreen}
+            />
             <Tab.Screen name="Carrito" component={CartScreen} />
             <Tab.Screen name="Salir" component={LogoutComponent} options={{ headerShown: false }} />
         </Tab.Navigator>
