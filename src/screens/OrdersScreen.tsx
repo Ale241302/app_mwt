@@ -17,6 +17,7 @@ interface Order {
     sap_number_preforma: string; // Preforma
     prod_fechai: string; // Producción
     cust_customer_name: string; // Cliente
+    operado_mwt: string; // Operador (0 = Cliente, 1 = Muito Work Limitada)
 }
 
 // Normalize status to group similar statuses together
@@ -49,6 +50,7 @@ export default function OrdersScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
     const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>([]);
+    const [selectedOperator, setSelectedOperator] = useState<string>(''); // '' = all, '0' = Cliente, '1' = Muito Work Limitada
 
     const STATUS_FILTERS: Record<string, string[]> = {
         'Creación': ['confirmed'],
@@ -129,8 +131,15 @@ export default function OrdersScreen() {
             );
         }
 
+        // 4. Operator Filter (only for administrators)
+        if (selectedOperator) {
+            result = result.filter(order =>
+                order.operado_mwt === selectedOperator
+            );
+        }
+
         setFilteredOrders(result);
-    }, [search, orders, selectedCustomers, selectedStatusFilters]);
+    }, [search, orders, selectedCustomers, selectedStatusFilters, selectedOperator]);
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -160,10 +169,22 @@ export default function OrdersScreen() {
         }
     };
 
+    const toggleOperatorFilter = (operator: string) => {
+        // Toggle: if already selected, deselect; otherwise select
+        if (selectedOperator === operator) {
+            setSelectedOperator('');
+        } else {
+            setSelectedOperator(operator);
+        }
+    };
+
     const getUniqueCustomers = () => {
         const customers = orders.map(o => o.cust_customer_name).filter(c => c);
         return Array.from(new Set(customers)).sort();
     };
+
+    // Check if user is administrator
+    const isAdministrator = user?.group_titles?.includes('Administrator') || false;
 
     // Grouping Logic: Group by NORMALIZED status
     const groupedOrders = filteredOrders.reduce((acc, order) => {
@@ -300,7 +321,7 @@ export default function OrdersScreen() {
                         <View style={styles.sideMenuHeader}>
                             <Text style={styles.sideMenuTitle}>Filtrar por</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
-                                <Ionicons name="close" size={24} color="#333" />
+                                <Ionicons name="close" size={24} color={colors.text} />
                             </TouchableOpacity>
                         </View>
 
@@ -323,6 +344,33 @@ export default function OrdersScreen() {
                                     );
                                 })}
                             </View>
+
+                            {/* Operator Filter - Only visible for administrators */}
+                            {isAdministrator && (
+                                <>
+                                    <Text style={styles.filterCategoryTitle}>Operador</Text>
+                                    <View style={{ marginBottom: 20 }}>
+                                        <TouchableOpacity
+                                            style={styles.filterOption}
+                                            onPress={() => toggleOperatorFilter('0')}
+                                        >
+                                            <View style={[styles.checkbox, selectedOperator === '0' && styles.checkboxChecked]}>
+                                                {selectedOperator === '0' && <Ionicons name="checkmark" size={14} color="#fff" />}
+                                            </View>
+                                            <Text style={styles.filterOptionText}>Cliente</Text>
+                                        </TouchableOpacity>
+                                        <TouchableOpacity
+                                            style={styles.filterOption}
+                                            onPress={() => toggleOperatorFilter('1')}
+                                        >
+                                            <View style={[styles.checkbox, selectedOperator === '1' && styles.checkboxChecked]}>
+                                                {selectedOperator === '1' && <Ionicons name="checkmark" size={14} color="#fff" />}
+                                            </View>
+                                            <Text style={styles.filterOptionText}>Muito Work Limitada</Text>
+                                        </TouchableOpacity>
+                                    </View>
+                                </>
+                            )}
 
                             <Text style={styles.filterCategoryTitle}>Clientes</Text>
                             {getUniqueCustomers().map(customer => {
