@@ -7,7 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 
 export default function OrderWebViewScreen({ route, navigation }: any) {
     const { orderNumber } = route.params;
-    const { colors } = useTheme();
+    const { colors, theme } = useTheme();
     const { user } = useAuth();
     const styles = getStyles(colors);
     const [loading, setLoading] = useState(true);
@@ -15,49 +15,187 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
 
     const webViewUrl = `https://mwt.one/es/?option=com_sppagebuilder&view=page&id=84&order_number=${orderNumber}&user_id=${user?.id || ''}`;
 
-    // JavaScript para ocultar el header y footer de forma más agresiva
-    const hideHeaderScript = `
-        (function() {
-            // Inyectar estilos CSS
-            const style = document.createElement('style');
-            style.innerHTML = \`
-                #sp-header,
-                #sp-footer {
-                    display: none !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                    height: 0 !important;
-                    overflow: hidden !important;
-                    position: absolute !important;
-                    top: -9999px !important;
-                }
-            \`;
-            document.head.appendChild(style);
-            
-            // Función para remover el header y footer directamente del DOM
-            function removeElements() {
-                const header = document.getElementById('sp-header');
-                if (header) {
-                    header.style.cssText = 'display: none !important; visibility: hidden !important; height: 0 !important;';
-                    header.remove();
-                }
-                
-                const footer = document.getElementById('sp-footer');
-                if (footer) {
-                    footer.style.cssText = 'display: none !important; visibility: hidden !important; height: 0 !important;';
-                    footer.remove();
-                }
+    const injectedJavaScript = React.useMemo(() => {
+        // Solo inyectar CSS si el modo oscuro está activo
+        const css = theme === 'dark' ? `
+            :root {
+                --mwt-primary: ${colors.primary};
+                --mwt-primary-2: ${colors.primary};
+                --mwt-deep: ${colors.text}; /* Para textos */
+                --mwt-border: ${colors.border};
+                --mwt-bg: ${colors.card};
+                --mwt-text-muted: ${colors.subtext};
+                --mwt-shadow: none;
+            }
+
+            body {
+                background-color: ${colors.background} !important;
+                color: ${colors.text} !important;
+            }
+
+            /* Overrides específicos de estructura y gradientes */
+            #section-id-b8d672c4-9d06-4327-b643-ebd1a5483357 {
+                background: ${colors.background} !important;
+            }
+            .usuarios-container {
+                background: ${colors.background} !important;
+                min-height: 100vh;
+            }
+
+            .usuarios-inner {
+                background-color: ${colors.card} !important;
+                color: ${colors.text} !important;
+                box-shadow: none !important;
+                border: 1px solid ${colors.border} !important;
+            }
+
+            /* Mobile Cards (Responsive) */
+            .order-card, .order-card-cliente {
+                background-color: ${colors.card} !important;
+                border: 1px solid ${colors.border} !important;
+                color: ${colors.text} !important;
+                box-shadow: none !important;
+            }
+
+            .order-label-detail {
+                color: ${colors.text} !important;
+                background: transparent !important;
+            }
+
+            .order-value {
+                color: ${colors.text} !important;
+            }
+
+            .order-input, 
+            input.order-input,
+            .order-card .order-input, 
+            .order-card-cliente .order-input {
+                background-color: ${colors.background} !important;
+                color: ${colors.text} !important;
+                border: 1px solid ${colors.primary} !important;
+            }
+
+            /* Header Titles */
+            .usuarios-title, .usuarios-header h1 {
+                color: ${colors.text} !important;
+            }
+
+            /* Botones */
+            .btn-back {
+                background: transparent !important;
+                border: 2px solid ${colors.primary} !important;
+                color: ${colors.primary} !important;
+            }
+            .btn-back:hover {
+                background: ${colors.primary} !important;
+                color: #fff !important;
+            }
+
+            .btn-nuevo {
+                background: ${colors.primary} !important;
+                color: #fff !important;
+            }
+            .btn-nuevo:hover {
+                background: ${colors.primary} !important;
+                opacity: 0.8;
+            }
+
+            /* btn-home usa --mwt-deep de fondo originalmente (#0b1e3a). 
+               En dark mode, --mwt-deep es texto (blanco), así que forzamos un color oscuro o primario para el fondo */
+            .btn-home {
+                background: ${colors.border} !important; /* O un color oscuro específico */
+                color: ${colors.text} !important;
+                border: 1px solid ${colors.border} !important;
+            }
+            .btn-home:hover {
+                background: ${colors.card} !important;
+                border-color: ${colors.primary} !important;
             }
             
-            // Intentar remover inmediatamente
-            removeElements();
+            /* Inputs, Selects y Tablas */
+            input, select, textarea, .form-control {
+                background-color: ${colors.background} !important;
+                color: ${colors.text} !important;
+                border: 1px solid ${colors.border} !important;
+            }
+            input:focus, select:focus, textarea:focus {
+                border-color: ${colors.primary} !important;
+            }
+
+            /* Textos generales */
+            p, span, label, div, td, th {
+                color: ${colors.text} !important;
+            }
             
-            // Intentar nuevamente después de un delay (por si carga dinámicamente)
-            setTimeout(removeElements, 100);
-            setTimeout(removeElements, 500);
-            setTimeout(removeElements, 1000);
-        })();
-    `;
+            .order-summary {
+                background: ${colors.card} !important;
+                border: 1px solid ${colors.border} !important;
+            }
+            
+            /* Links */
+            a {
+                color: ${colors.primary} !important;
+            }
+            a.btn {
+                text-decoration: none !important;
+            }
+
+            /* Ocultar elementos innecesarios */
+            #sp-header, #sp-footer {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
+                position: absolute !important;
+                top: -9999px !important;
+            }
+        ` : `
+            /* CSS minimo para ocultar header/footer en light mode si fuera necesario, 
+               aunque el JS ya lo hace. Dejamos esto vacio o solo con lo critico si se desea.
+               Por instruccion estricta "no enviar esto", enviamos cadena vacia. */
+             #sp-header, #sp-footer { display: none !important; }
+        `;
+
+        return `
+            (function() {
+                try {
+                    // 1. Inyectar Estilos
+                    const styleId = 'mwt-injected-styles';
+                    let style = document.getElementById(styleId);
+                    if (!style) {
+                        style = document.createElement('style');
+                        style.id = styleId;
+                        document.head.appendChild(style);
+                    }
+                    style.innerHTML = \`${css}\`;
+
+                    // 2. Remover Header/Footer (Lógica robusta)
+                    function removeElements() {
+                        const ids = ['sp-header', 'sp-footer'];
+                        ids.forEach(id => {
+                            const params = document.querySelectorAll('#' + id);
+                            params.forEach(el => {
+                                el.style.setProperty('display', 'none', 'important');
+                                el.style.setProperty('visibility', 'hidden', 'important');
+                                el.style.setProperty('height', '0', 'important');
+                                el.style.setProperty('opacity', '0', 'important');
+                            });
+                        });
+                    }
+
+                    // Ejecutar limpieza y re-verificar
+                    removeElements();
+                    setTimeout(removeElements, 100);
+                    setTimeout(removeElements, 500);
+                    setInterval(removeElements, 2000); 
+
+                } catch (e) {
+                    console.error('Error in injected script:', e);
+                }
+            })();
+        `;
+    }, [colors, theme]);
 
     return (
         <View style={styles.container}>
@@ -76,7 +214,7 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
             <WebView
                 source={{ uri: webViewUrl }}
                 style={styles.webview}
-                injectedJavaScript={hideHeaderScript}
+                injectedJavaScript={injectedJavaScript}
                 onLoadStart={() => setLoading(true)}
                 onLoadEnd={() => setLoading(false)}
                 onError={() => {
