@@ -7,7 +7,7 @@ import { useTheme } from '../context/ThemeContext';
 
 export default function OrderWebViewScreen({ route, navigation }: any) {
     const { orderNumber } = route.params;
-    const { colors } = useTheme();
+    const { colors, theme } = useTheme();
     const { user } = useAuth();
     const styles = getStyles(colors);
     const [loading, setLoading] = useState(true);
@@ -15,49 +15,149 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
 
     const webViewUrl = `https://mwt.one/es/?option=com_sppagebuilder&view=page&id=143&order_number=${orderNumber}&user_id=${user?.id || ''}`;
 
-    // JavaScript para ocultar el header y footer de forma más agresiva
-    const hideHeaderScript = `
-        (function() {
-            // Inyectar estilos CSS
-            const style = document.createElement('style');
-            style.innerHTML = \`
-                #sp-header,
-                #sp-footer {
-                    display: none !important;
-                    visibility: hidden !important;
-                    opacity: 0 !important;
-                    height: 0 !important;
-                    overflow: hidden !important;
-                    position: absolute !important;
-                    top: -9999px !important;
-                }
-            \`;
-            document.head.appendChild(style);
-            
-            // Función para remover el header y footer directamente del DOM
-            function removeElements() {
-                const header = document.getElementById('sp-header');
-                if (header) {
-                    header.style.cssText = 'display: none !important; visibility: hidden !important; height: 0 !important;';
-                    header.remove();
-                }
-                
-                const footer = document.getElementById('sp-footer');
-                if (footer) {
-                    footer.style.cssText = 'display: none !important; visibility: hidden !important; height: 0 !important;';
-                    footer.remove();
-                }
+    const injectedJavaScript = React.useMemo(() => {
+        // Solo inyectar CSS si el modo oscuro está activo
+        const css = theme === 'dark' ? `
+            :root {
+                --mwt-primary: ${colors.primary};
+                --mwt-primary-2: ${colors.primary};
+                --mwt-deep: ${colors.text}; /* Para textos en dark mode */
+                --mwt-border: ${colors.border};
+                --mwt-bg: ${colors.card};
+                --mwt-text-muted: ${colors.subtext};
+                --mwt-shadow: none;
+                --mwt-danger: #ef4444;
+            }
+
+            body {
+                background-color: ${colors.background} !important;
+                color: ${colors.text} !important;
+            }
+
+            /* Container Overrides */
+            #section-id-b8d672c4-9d06-4327-b643-ebd1a5483357,
+            .rastreo-container {
+                background: ${colors.background} !important;
+                min-height: 100vh;
+            }
+
+            .rastreo-inner {
+                background-color: #fff !important;
+                color: ${colors.text} !important;
+                box-shadow: none !important;
+                border: 1px solid ${colors.border} !important;
+            }
+
+            /* Status Icons & Labels */
+            .status-label {
+                color: ${colors.background} !important;
+            }
+            .status-item:hover .status-label, 
+            .status-item.active .status-label {
+                color: ${colors.primary} !important; 
+            }
+
+            /* Forms */
+            .form-label {
+                color: ${colors.background} !important;
             }
             
-            // Intentar remover inmediatamente
-            removeElements();
+            .form-control {
+                background-color: #fff !important;
+                color: ${colors.background} !important;
+                border: 1px solid ${colors.border} !important;
+            }
+            .form-control:focus {
+                border-color: ${colors.primary} !important;
+            }
             
-            // Intentar nuevamente después de un delay (por si carga dinámicamente)
-            setTimeout(removeElements, 100);
-            setTimeout(removeElements, 500);
-            setTimeout(removeElements, 1000);
-        })();
-    `;
+            /* Buttons */
+            .btn {
+                 color: #fff !important;
+            }
+            .btn-danger {
+                background-color: #ef4444 !important;
+            }
+            .btn-dashboard, .btn-siguiente {
+                background-color: ${colors.primary} !important;
+            }
+            .btn-guardar {
+                background-color: ${colors.border} !important; /* Darker bg for secondary action */
+                color: ${colors.text} !important;
+            }
+            
+            /* Upload Zone */
+            .upload-zone {
+                background-color: ${colors.background} !important;
+                border-color: ${colors.primary} !important;
+                color: ${colors.text} !important;
+            }
+            .upload-title, .upload-meta {
+                color: ${colors.text} !important;
+            }
+
+            /* Radio Group */
+            .radio-inline {
+                color: ${colors.text} !important;
+            }
+            .radio-with-icon {
+                background-color: #fff !important;
+                border-color: ${colors.border} !important;
+            }
+            
+            /* Ocultar header/footer */
+            #sp-header, #sp-footer {
+                display: none !important;
+                visibility: hidden !important;
+                opacity: 0 !important;
+                height: 0 !important;
+                overflow: hidden !important;
+                position: absolute !important;
+                top: -9999px !important;
+            }
+        ` : `
+             #sp-header, #sp-footer { display: none !important; }
+        `;
+
+        return `
+            (function() {
+                try {
+                    // 1. Inyectar Estilos
+                    const styleId = 'mwt-injected-styles';
+                    let style = document.getElementById(styleId);
+                    if (!style) {
+                        style = document.createElement('style');
+                        style.id = styleId;
+                        document.head.appendChild(style);
+                    }
+                    style.innerHTML = \`${css}\`;
+
+                    // 2. Remover Header/Footer (Lógica robusta)
+                    function removeElements() {
+                        const ids = ['sp-header', 'sp-footer'];
+                        ids.forEach(id => {
+                            const params = document.querySelectorAll('#' + id);
+                            params.forEach(el => {
+                                el.style.setProperty('display', 'none', 'important');
+                                el.style.setProperty('visibility', 'hidden', 'important');
+                                el.style.setProperty('height', '0', 'important');
+                                el.style.setProperty('opacity', '0', 'important');
+                            });
+                        });
+                    }
+
+                    // Ejecutar limpieza
+                    removeElements();
+                    setTimeout(removeElements, 100);
+                    setTimeout(removeElements, 500);
+                    setInterval(removeElements, 2000); 
+
+                } catch (e) {
+                    console.error('Error in injected script:', e);
+                }
+            })();
+        `;
+    }, [colors, theme]);
 
     return (
         <View style={styles.container}>
@@ -76,7 +176,7 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
             <WebView
                 source={{ uri: webViewUrl }}
                 style={styles.webview}
-                injectedJavaScript={hideHeaderScript}
+                injectedJavaScript={injectedJavaScript}
                 onLoadStart={() => setLoading(true)}
                 onLoadEnd={() => setLoading(false)}
                 onError={() => {
