@@ -64,9 +64,9 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
             }
             
             .form-control {
-                background-color: #fff !important;
-                color: ${colors.background} !important;
-                border: 1px solid ${colors.border} !important;
+                background-color: #202938 !important;
+                color: #9da6b5 !important;
+                border: 1px solid #313a49 !important;
             }
             .form-control:focus {
                 border-color: ${colors.primary} !important;

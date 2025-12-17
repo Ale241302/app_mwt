@@ -72,9 +72,9 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
         input.order-input,
         .order-card .order-input, 
         .order-card-cliente .order-input {
-            background-color: ${colors.background} !important;
-            color: ${colors.text} !important;
-            border: 1px solid ${colors.primary} !important;
+            background-color: #202938 !important;
+            color: #9da6b5 !important;
+            border: 1px solid #313a49 !important;
         }
 
         /* Header Titles */
@@ -114,9 +114,9 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
         
         /* Inputs, Selects y Tablas */
         input, select, textarea, .form-control {
-            background-color: ${colors.background} !important;
-            color: ${colors.text} !important;
-            border: 1px solid ${colors.border} !important;
+            background-color: #202938 !important;
+            color: #9da6b5 !important;
+            border: 1px solid #313a49 !important;
         }
         input:focus, select:focus, textarea:focus {
             border-color: ${colors.primary} !important;
