@@ -3,11 +3,53 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Dimensions, Image, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Svg, { Defs, FeColorMatrix, Filter, Image as SvgImage } from 'react-native-svg';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
+
+/**
+ * A helper component to render the attribute icon.
+ * In Dark Mode, it applies a ColorMatrix filter to:
+ * 1. Turn Black lines -> White
+ * 2. Keep Green fills -> Green
+ */
+const AttributeIcon = ({ uri, isDark, style }: { uri: string; isDark: boolean; style: any }) => {
+    if (!isDark) {
+        return <Image source={{ uri }} style={style} resizeMode="contain" />;
+    }
+
+    // Matrix to map:
+    // Black(0,0,0) -> White(1,1,1)
+    // Green(0,1,0) -> Green(0,1,0)
+    // White(1,1,1) -> White(1,1,1)
+    // Logic: R' = R - G + 1, G' = 1, B' = B - G + 1
+    const colorMatrix = [
+        1, -1, 0, 0, 1, // R' = R - G + 1
+        0, 0, 0, 0, 1,  // G' = 1 (Force Green/White saturation)
+        0, -1, 1, 0, 1, // B' = B - G + 1
+        0, 0, 0, 1, 0   // A' = A
+    ];
+
+    return (
+        <Svg width={36} height={36} style={style}>
+            <Defs>
+                <Filter id="darkModeFilterDetail">
+                    <FeColorMatrix type="matrix" values={colorMatrix.join(' ')} />
+                </Filter>
+            </Defs>
+            <SvgImage
+                href={{ uri }}
+                width="100%"
+                height="100%"
+                preserveAspectRatio="xMidYMid meet"
+                filter="url(#darkModeFilterDetail)"
+            />
+        </Svg>
+    );
+};
 
 interface ProductFile {
     file_id: string;
@@ -60,7 +102,7 @@ interface ProductDetail {
 export default function ProductDetailScreen({ route, navigation }: any) {
     const { productId } = route.params;
     const { user } = useAuth();
-    const { colors } = useTheme();
+    const { colors, theme } = useTheme();
     const styles = getStyles(colors);
     const [product, setProduct] = useState<ProductDetail | null>(null);
     const [loading, setLoading] = useState(true);
@@ -68,6 +110,8 @@ export default function ProductDetailScreen({ route, navigation }: any) {
     const [quantities, setQuantities] = useState<Record<string, string>>({}); // variant_id -> quantity
     const [addingToCart, setAddingToCart] = useState(false);
     const [selectedSpecText, setSelectedSpecText] = useState<string | null>(null);
+
+    const isDark = theme === 'dark';
 
     useEffect(() => {
         fetchProductDetail();
@@ -306,13 +350,17 @@ export default function ProductDetailScreen({ route, navigation }: any) {
                             {Array.from(uniqueIconsMap.entries()).map(([url, text], index) => (
                                 <TouchableOpacity
                                     key={index}
-                                    style={[styles.iconWrapper, selectedSpecText === fixText(text) && styles.iconWrapperSelected]}
+                                    style={[
+                                        styles.iconWrapper,
+                                        selectedSpecText === fixText(text) && styles.iconWrapperSelected,
+                                        isDark && { backgroundColor: 'transparent', borderWidth: 0 }
+                                    ]}
                                     onPress={() => setSelectedSpecText(fixText(text))}
                                 >
-                                    <Image
-                                        source={{ uri: url }}
+                                    <AttributeIcon
+                                        uri={url}
+                                        isDark={isDark}
                                         style={styles.specIcon}
-                                        resizeMode="contain"
                                     />
                                 </TouchableOpacity>
                             ))}
@@ -565,10 +613,7 @@ const getStyles = (colors: any) => StyleSheet.create({
         marginBottom: 8,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fff',
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: colors.border,
+        backgroundColor: 'transparent'
     },
     iconWrapperSelected: {
         borderColor: colors.primary,

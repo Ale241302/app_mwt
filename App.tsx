@@ -3,6 +3,7 @@ import { StatusBar } from 'expo-status-bar';
 import React from 'react';
 import 'react-native-gesture-handler';
 import { AuthProvider } from './src/context/AuthContext';
+import { CartProvider } from './src/context/CartContext';
 import RootNavigator from './src/navigation/RootNavigator';
 
 // Notifications.setNotificationHandler({
@@ -28,8 +29,10 @@ export default function App() {
     return (
         <AuthProvider>
             <ThemeProvider>
-                <StatusBar style="auto" />
-                <RootNavigator />
+                <CartProvider>
+                    <StatusBar style="auto" />
+                    <RootNavigator />
+                </CartProvider>
             </ThemeProvider>
         </AuthProvider>
     );

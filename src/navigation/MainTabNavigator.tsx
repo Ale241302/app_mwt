@@ -1,8 +1,9 @@
 import { Ionicons } from '@expo/vector-icons';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import React from 'react';
-import { ActivityIndicator, View } from 'react-native';
+import { ActivityIndicator, Text, View } from 'react-native';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import CartScreen from '../screens/CartScreen';
 import DashboardWebViewScreen from '../screens/DashboardWebViewScreen';
 import OrdersScreen from '../screens/OrdersScreen'; // Import the real screen
@@ -26,6 +27,7 @@ import { useTheme } from '../context/ThemeContext';
 export default function MainTabNavigator() {
     const { user } = useAuth();
     const { colors, theme } = useTheme();
+    const { cartCount } = useCart();
 
     return (
         <View style={{ flex: 1 }}>
@@ -69,7 +71,36 @@ export default function MainTabNavigator() {
                             iconName = 'alert';
                         }
 
-                        return <Ionicons name={iconName} size={size} color={color} />;
+                        return (
+                            <View>
+                                <Ionicons name={iconName} size={size} color={color} />
+                                {route.name === 'Carrito' && cartCount > 0 && (
+                                    <View
+                                        style={{
+                                            position: 'absolute',
+                                            right: -6,
+                                            top: -3,
+                                            backgroundColor: '#10b981',
+                                            borderRadius: 10,
+                                            width: 16,
+                                            height: 16,
+                                            justifyContent: 'center',
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <Text
+                                            style={{
+                                                color: '#fff',
+                                                fontSize: 10,
+                                                fontWeight: 'bold',
+                                            }}
+                                        >
+                                            {cartCount}
+                                        </Text>
+                                    </View>
+                                )}
+                            </View>
+                        );
                     },
                 })}
             >

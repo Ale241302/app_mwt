@@ -3,24 +3,30 @@ import { useNavigation } from '@react-navigation/native';
 import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, FlatList, Image, Modal, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Svg, { Defs, FeColorMatrix, Filter, Image as SvgImage } from 'react-native-svg';
+import BinocularsIcon from '../components/BinocularsIcon';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
+
 const { width, height } = Dimensions.get('window');
 const COLUMN_COUNT = 2;
 const CARD_WIDTH = (width - 40) / COLUMN_COUNT;
+
 
 interface ProductFile {
     file_url: string;
     file_type: string;
 }
 
+
 interface ProductAttribute {
     text: string;
     image_url: string | null;
     class: string | null;
 }
+
 
 interface Product {
     product_id: string;
@@ -38,6 +44,7 @@ interface Product {
     files: ProductFile[];
 }
 
+
 // Map user friendly names to keys
 const FILTER_CATEGORIES = [
     { label: 'Planilla', key: 'product_plantilla' },
@@ -48,15 +55,63 @@ const FILTER_CATEGORIES = [
     { label: 'Suela', key: 'product_suela' },
 ];
 
+/**
+ * A helper component to render the attribute icon.
+ * In Dark Mode, it applies a ColorMatrix filter to:
+ * 1. Turn Black lines -> White
+ * 2. Keep Green fills -> Green
+ */
+const AttributeIcon = ({ uri, isDark, style }: { uri: string; isDark: boolean; style: any }) => {
+    if (!isDark) {
+        return <Image source={{ uri }} style={style} resizeMode="contain" />;
+    }
+
+    // Matrix to map:
+    // Black(0,0,0) -> White(1,1,1)
+    // Green(0,1,0) -> Green(0,1,0)
+    // White(1,1,1) -> White(1,1,1)
+    // Logic: R' = R - G + 1, G' = 1, B' = B - G + 1
+    const colorMatrix = [
+        1, -1, 0, 0, 1, // R' = R - G + 1
+        0, 0, 0, 0, 1,  // G' = 1 (Force Green/White saturation)
+        0, -1, 1, 0, 1, // B' = B - G + 1
+        0, 0, 0, 1, 0   // A' = A
+    ];
+
+    return (
+        <Svg width={18} height={18} style={style}>
+            <Defs>
+                <Filter id="darkModeFilter">
+                    <FeColorMatrix type="matrix" values={colorMatrix.join(' ')} />
+                </Filter>
+            </Defs>
+            <SvgImage
+                href={{ uri }}
+                width="100%"
+                height="100%"
+                preserveAspectRatio="xMidYMid meet"
+                filter="url(#darkModeFilter)"
+            />
+        </Svg>
+    );
+};
+
+
 export default function ProductsScreen() {
     const navigation = useNavigation<any>();
     const { user } = useAuth();
-    const { colors } = useTheme();
+    const { colors, theme } = useTheme();
+    // Re-calculate styles when theme changes isn't automatic with this pattern unless we pass theme, 
+    // but colors updates.
+    // However, styles object is constant for valid lifecycle. 
+    // We used to rely on inline styles for dark mode overrides.
     const styles = getStyles(colors);
     const [products, setProducts] = useState<Product[]>([]);
     const [filteredProducts, setFilteredProducts] = useState<Product[]>([]);
     const [loading, setLoading] = useState(true);
     const [search, setSearch] = useState('');
+
+    const isDark = theme === 'dark';
 
     // Filter State
     const [modalVisible, setModalVisible] = useState(false);
@@ -174,23 +229,23 @@ export default function ProductsScreen() {
 
                     <View style={styles.iconRow}>
                         {calzadoImg && (
-                            <View style={styles.iconWrapper}>
-                                <Image source={{ uri: calzadoImg }} style={styles.attributeIcon} resizeMode="contain" />
+                            <View style={[styles.iconWrapper, isDark && { backgroundColor: 'transparent', borderWidth: 0 }]}>
+                                <AttributeIcon uri={calzadoImg} isDark={isDark} style={styles.attributeIcon} />
                             </View>
                         )}
                         {capelladoImg && (
-                            <View style={styles.iconWrapper}>
-                                <Image source={{ uri: capelladoImg }} style={styles.attributeIcon} resizeMode="contain" />
+                            <View style={[styles.iconWrapper, isDark && { backgroundColor: 'transparent', borderWidth: 0 }]}>
+                                <AttributeIcon uri={capelladoImg} isDark={isDark} style={styles.attributeIcon} />
                             </View>
                         )}
                         {punteraImg && (
-                            <View style={styles.iconWrapper}>
-                                <Image source={{ uri: punteraImg }} style={styles.attributeIcon} resizeMode="contain" />
+                            <View style={[styles.iconWrapper, isDark && { backgroundColor: 'transparent', borderWidth: 0 }]}>
+                                <AttributeIcon uri={punteraImg} isDark={isDark} style={styles.attributeIcon} />
                             </View>
                         )}
                         {suelaImg && (
-                            <View style={styles.iconWrapper}>
-                                <Image source={{ uri: suelaImg }} style={styles.attributeIcon} resizeMode="contain" />
+                            <View style={[styles.iconWrapper, isDark && { backgroundColor: 'transparent', borderWidth: 0 }]}>
+                                <AttributeIcon uri={suelaImg} isDark={isDark} style={styles.attributeIcon} />
                             </View>
                         )}
                     </View>
@@ -200,17 +255,17 @@ export default function ProductsScreen() {
                             <Text style={styles.price}>${parseFloat(item.product_sort_price).toFixed(2)}</Text>
                         )}
                         <TouchableOpacity
-                            style={styles.viewButton}
+                            style={{ marginLeft: 'auto', padding: 8 }}
                             onPress={() => navigation.navigate('ProductDetail', { productId: item.product_id })}
                         >
-                            <Text style={styles.viewButtonText}>Ver</Text>
-                            <Ionicons name="arrow-forward" size={16} color="#fff" />
+                            <BinocularsIcon size={24} color="#10b981" />
                         </TouchableOpacity>
                     </View>
                 </View>
             </TouchableOpacity>
         );
     };
+
 
     if (loading) {
         return (
@@ -219,6 +274,7 @@ export default function ProductsScreen() {
             </View>
         );
     }
+
 
     return (
         <View style={styles.container}>
@@ -237,6 +293,7 @@ export default function ProductsScreen() {
                 </TouchableOpacity>
             </View>
 
+
             <FlatList
                 data={filteredProducts}
                 renderItem={renderItem}
@@ -247,6 +304,7 @@ export default function ProductsScreen() {
                 showsVerticalScrollIndicator={false}
             />
 
+
             {/* Side Menu Filter Modal */}
             <Modal
                 animationType="slide"
@@ -255,10 +313,11 @@ export default function ProductsScreen() {
                 onRequestClose={() => setModalVisible(false)}
             >
                 <View style={styles.modalOverlay}>
-                    {/* Invisible pressable area to close onclick outside not strictly requested but good UX. 
-                        User asked for side menu explicitly. 
+                    {/* Invisible pressable area to close onclick outside not strictly requested but good UX.
+                        User asked for side menu explicitly.
                     */}
                     <TouchableOpacity style={styles.modalBackdrop} onPress={() => setModalVisible(false)} />
+
 
                     <View style={styles.sideMenu}>
                         <View style={styles.sideMenuHeader}>
@@ -268,10 +327,12 @@ export default function ProductsScreen() {
                             </TouchableOpacity>
                         </View>
 
+
                         <ScrollView style={styles.filterScroll} showsVerticalScrollIndicator={false}>
                             {FILTER_CATEGORIES.map(cat => {
                                 const options = getUniqueValues(cat.key);
                                 if (options.length === 0) return null; // Don't show empty categories
+
 
                                 return (
                                     <View key={cat.key} style={styles.filterCategoryContainer}>
@@ -302,6 +363,7 @@ export default function ProductsScreen() {
         </View>
     );
 }
+
 
 const getStyles = (colors: any) => StyleSheet.create({
     container: {
@@ -404,10 +466,7 @@ const getStyles = (colors: any) => StyleSheet.create({
         marginRight: 4,
         justifyContent: 'center',
         alignItems: 'center',
-        backgroundColor: '#fff',
-        borderRadius: 4,
-        borderWidth: 1,
-        borderColor: colors.border,
+        backgroundColor: 'transparent',
     },
     footerRow: {
         flexDirection: 'row',

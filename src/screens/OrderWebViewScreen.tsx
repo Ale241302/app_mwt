@@ -17,7 +17,7 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
 
     const injectedJavaScript = React.useMemo(() => {
         // Solo inyectar CSS si el modo oscuro está activo
-        const css = theme === 'dark' ? `
+        const darkModeCSS = `
             :root {
                 --mwt-primary: ${colors.primary};
                 --mwt-primary-2: ${colors.primary};
@@ -38,19 +38,20 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
             #section-id-b8d672c4-9d06-4327-b643-ebd1a5483357,
             .rastreo-container {
                 background: ${colors.background} !important;
-                min-height: 100vh;
+                 padding: 0!important;
             }
 
             .rastreo-inner {
-                background-color: #fff !important;
+                background-color:${colors.background} !important;
                 color: ${colors.text} !important;
                 box-shadow: none !important;
                 border: 1px solid ${colors.border} !important;
+                 border-radius: 0px!important;
             }
 
             /* Status Icons & Labels */
             .status-label {
-                color: ${colors.background} !important;
+                color: #fff !important;
             }
             .status-item:hover .status-label, 
             .status-item.active .status-label {
@@ -59,7 +60,7 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
 
             /* Forms */
             .form-label {
-                color: ${colors.background} !important;
+                color: #fff !important;
             }
             
             .form-control {
@@ -115,9 +116,70 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
                 position: absolute !important;
                 top: -9999px !important;
             }
-        ` : `
-             #sp-header, #sp-footer { display: none !important; }
+                .btn.btn-home, .btn-back {
+       display: none  !important;
+  }
+       .btn-dashboard{
+       display: none  !important;
+  }
+       div.preforma-preview a{
+       background-color: #fff !important;
+  }
+       /* Convierte los iconos de status a blanco */
+.status-icon.icon-vacio {
+    filter: brightness(0) invert(1);
+}
+    /* Opción 1: Eliminar bordes izquierdos */
+.status-icon.icon-vacio,
+.status-icon.icon-vacio::before,
+.status-icon.icon-vacio::after {
+    border-left: none !important;
+    border: none !important;
+}
+
+/* Opción 2: Si es del contenedor padre */
+.status-icon {
+    border-left: none !important;
+}
+
+/* Opción 3: Si hay un pseudo-elemento causando la línea */
+.status-icon::before,
+.status-icon::after {
+    display: none !important;
+}
+
+/* Opción 4: Eliminar cualquier outline o box-shadow */
+.status-icon.icon-vacio {
+    outline: none !important;
+    box-shadow: none !important;
+}
+
+
         `;
+        // CSS para modo claro (Light Mode)
+        const lightModeCSS = `
+        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+        #section-id-b8d672c4-9d06-4327-b643-ebd1a5483357, .rastreo-container{
+       background: ${colors.background}  !important;
+       padding: 0!important;
+  }
+        .rastreo-inner {
+                 border-radius: 0px!important;
+            }
+       .order-summary {
+       background: transparent  !important;
+  }
+       .btn.btn-home, .btn-back {
+       display: none  !important;
+  }
+       .btn-dashboard{
+       display: none  !important;
+  }
+    `;
+
+        // Seleccionar CSS según el tema
+        const css = theme === 'dark' ? darkModeCSS : lightModeCSS;
 
         return `
             (function() {

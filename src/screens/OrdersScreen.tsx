@@ -20,6 +20,8 @@ interface Order {
     operado_mwt: string; // Operador (0 = Cliente, 1 = Muito Work Limitada)
 }
 
+import BinocularsIcon from '../components/BinocularsIcon';
+
 // Normalize status to group similar statuses together
 const normalizeStatus = (status: string): string => {
     const normalized: Record<string, string> = {
@@ -273,7 +275,7 @@ export default function OrdersScreen() {
                                                         style={styles.iconButton}
                                                         onPress={() => navigation.navigate('OrderWebView', { orderNumber: order.order_number })}
                                                     >
-                                                        <Ionicons name="eye" size={20} color="#10b981" />
+                                                        <BinocularsIcon size={20} color="#10b981" />
                                                     </TouchableOpacity>
                                                 </View>
                                             </View>

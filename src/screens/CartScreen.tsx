@@ -6,6 +6,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Alert, Dimensions, Image, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -41,6 +42,7 @@ interface GroupedCartItem {
 
 export default function CartScreen() {
     const { user } = useAuth();
+    const { refreshCart } = useCart();
     const navigation = useNavigation<any>();
     const { colors } = useTheme();
     const styles = getStyles(colors);
@@ -120,6 +122,7 @@ export default function CartScreen() {
 
     useEffect(() => {
         fetchCart();
+        refreshCart(); // Ensure global count is sync on enter
     }, [user]);
 
     const onRefresh = () => {
@@ -166,6 +169,7 @@ export default function CartScreen() {
 
             if (response.data && response.data.success) {
                 fetchCart();
+                refreshCart(); // Update global count
             } else {
                 Alert.alert('Error', response.data.message || 'No se pudo actualizar la cantidad');
                 fetchCart();
@@ -244,6 +248,7 @@ export default function CartScreen() {
             if (response.data && response.data.success) {
                 Alert.alert('Eliminado', response.data.message);
                 fetchCart();
+                refreshCart(); // Update global count
             } else {
                 Alert.alert('Error', response.data.message || 'No se pudo eliminar');
             }
@@ -280,6 +285,7 @@ export default function CartScreen() {
             if (response.data && response.data.success) {
                 Alert.alert('Éxito', response.data.message || 'Compra realizada con éxito');
                 fetchCart();
+                refreshCart(); // Update global count is empty
             } else {
                 Alert.alert('Error', response.data.message || 'No se pudo completar la compra');
             }
