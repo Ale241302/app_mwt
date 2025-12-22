@@ -47,7 +47,7 @@ interface Product {
 
 // Map user friendly names to keys
 const FILTER_CATEGORIES = [
-    { label: 'Planilla', key: 'product_plantilla' },
+    { label: 'Plantilla', key: 'product_plantilla' },
     { label: 'Calzados', key: 'product_calzado' },
     { label: 'Capellada', key: 'product_capellado' },
     { label: 'Punteras', key: 'product_puntera' },
