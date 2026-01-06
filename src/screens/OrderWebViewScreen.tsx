@@ -1,6 +1,7 @@
 import { Ionicons } from '@expo/vector-icons';
-import React, { useState } from 'react';
+import React, { useRef, useState } from 'react';
 import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
 import { WebView } from 'react-native-webview';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
@@ -12,6 +13,28 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
     const styles = getStyles(colors);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
+    const webViewRef = useRef<WebView>(null);
+    const [canGoBack, setCanGoBack] = useState(false);
+    const [canGoForward, setCanGoForward] = useState(false);
+
+    const onHandlerStateChange = (event: any) => {
+        if (event.nativeEvent.state === State.END) {
+            const { translationX } = event.nativeEvent;
+
+            // Swipe Left (translationX < 0) -> Go Back
+            if (translationX < -50) {
+                if (canGoBack && webViewRef.current) {
+                    webViewRef.current.goBack();
+                }
+            }
+            // Swipe Right (translationX > 0) -> Go Forward
+            else if (translationX > 50) {
+                if (canGoForward && webViewRef.current) {
+                    webViewRef.current.goForward();
+                }
+            }
+        }
+    };
 
     const webViewUrl = `https://mwt.one/es/?option=com_sppagebuilder&view=page&id=143&order_number=${orderNumber}&user_id=${user?.id || ''}`;
 
@@ -222,66 +245,78 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
     }, [colors, theme]);
 
     return (
-        <View style={styles.container}>
-            {/* Header */}
-            <View style={styles.header}>
-                <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
-                    <Ionicons name="arrow-back" size={24} color={colors.text} />
-                </TouchableOpacity>
-                <Text style={styles.headerTitle} numberOfLines={1}>
-                    Rastreo: {orderNumber}
-                </Text>
-                <View style={{ width: 24 }} />
-            </View>
-
-            {/* WebView */}
-            <WebView
-                source={{ uri: webViewUrl }}
-                style={styles.webview}
-                injectedJavaScript={injectedJavaScript}
-                onLoadStart={() => setLoading(true)}
-                onLoadEnd={() => setLoading(false)}
-                onError={() => {
-                    setLoading(false);
-                    setError(true);
-                }}
-                startInLoadingState={true}
-                renderLoading={() => (
-                    <View style={styles.loadingContainer}>
-                        <ActivityIndicator size="large" color={colors.primary} />
-                        <Text style={styles.loadingText}>Cargando rastreo...</Text>
+        <GestureHandlerRootView style={{ flex: 1 }}>
+            <PanGestureHandler
+                onHandlerStateChange={onHandlerStateChange}
+                activeOffsetX={[-20, 20]}
+            >
+                <View style={styles.container}>
+                    {/* Header */}
+                    <View style={styles.header}>
+                        <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
+                            <Ionicons name="arrow-back" size={24} color={colors.text} />
+                        </TouchableOpacity>
+                        <Text style={styles.headerTitle} numberOfLines={1}>
+                            Rastreo: {orderNumber}
+                        </Text>
+                        <View style={{ width: 24 }} />
                     </View>
-                )}
-            />
 
-            {/* Error State */}
-            {error && (
-                <View style={styles.errorContainer}>
-                    <Ionicons name="alert-circle" size={64} color={colors.subtext} />
-                    <Text style={styles.errorTitle}>Error al cargar</Text>
-                    <Text style={styles.errorMessage}>
-                        No se pudo cargar la página de rastreo
-                    </Text>
-                    <TouchableOpacity
-                        style={styles.retryButton}
-                        onPress={() => {
-                            setError(false);
-                            setLoading(true);
+                    {/* WebView */}
+                    <WebView
+                        ref={webViewRef}
+                        source={{ uri: webViewUrl }}
+                        style={styles.webview}
+                        injectedJavaScript={injectedJavaScript}
+                        onLoadStart={() => setLoading(true)}
+                        onLoadEnd={() => setLoading(false)}
+                        onError={() => {
+                            setLoading(false);
+                            setError(true);
                         }}
-                    >
-                        <Text style={styles.retryButtonText}>Reintentar</Text>
-                    </TouchableOpacity>
-                </View>
-            )}
+                        startInLoadingState={true}
+                        onNavigationStateChange={(navState) => {
+                            setCanGoBack(navState.canGoBack);
+                            setCanGoForward(navState.canGoForward);
+                        }}
+                        renderLoading={() => (
+                            <View style={styles.loadingContainer}>
+                                <ActivityIndicator size="large" color={colors.primary} />
+                                <Text style={styles.loadingText}>Cargando rastreo...</Text>
+                            </View>
+                        )}
+                    />
 
-            {/* Loading Overlay */}
-            {loading && !error && (
-                <View style={styles.loadingOverlay}>
-                    <ActivityIndicator size="large" color={colors.primary} />
-                    <Text style={styles.loadingText}>Cargando...</Text>
+                    {/* Error State */}
+                    {error && (
+                        <View style={styles.errorContainer}>
+                            <Ionicons name="alert-circle" size={64} color={colors.subtext} />
+                            <Text style={styles.errorTitle}>Error al cargar</Text>
+                            <Text style={styles.errorMessage}>
+                                No se pudo cargar la página de rastreo
+                            </Text>
+                            <TouchableOpacity
+                                style={styles.retryButton}
+                                onPress={() => {
+                                    setError(false);
+                                    setLoading(true);
+                                }}
+                            >
+                                <Text style={styles.retryButtonText}>Reintentar</Text>
+                            </TouchableOpacity>
+                        </View>
+                    )}
+
+                    {/* Loading Overlay */}
+                    {loading && !error && (
+                        <View style={styles.loadingOverlay}>
+                            <ActivityIndicator size="large" color={colors.primary} />
+                            <Text style={styles.loadingText}>Cargando...</Text>
+                        </View>
+                    )}
                 </View>
-            )}
-        </View>
+            </PanGestureHandler>
+        </GestureHandlerRootView>
     );
 }
 

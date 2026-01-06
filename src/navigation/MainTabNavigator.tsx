@@ -109,6 +109,15 @@ export default function MainTabNavigator() {
                 <Tab.Screen
                     name="Dashboard"
                     component={DashboardWebViewScreen}
+                    listeners={({ navigation }) => ({
+                        tabPress: (e) => {
+                            if (navigation.isFocused()) {
+                                // If already on Dashboard, trigger a reset
+                                e.preventDefault(); // Stop default behavior (though staying on tab is default)
+                                navigation.setParams({ resetTs: Date.now() });
+                            }
+                        },
+                    })}
                 />
                 <Tab.Screen name="Carrito" component={CartScreen} />
                 <Tab.Screen name="Salir" component={LogoutComponent} options={{ headerShown: false }} />
