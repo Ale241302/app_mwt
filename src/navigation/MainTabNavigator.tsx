@@ -20,22 +20,30 @@ const LogoutComponent = () => {
 };
 
 import DashboardIcon from '../components/DashboardIcon';
+import LanguageSelector from '../components/LanguageSelector';
 import ThemeToggle from '../components/ThemeToggle';
 import WhatsAppFAB from '../components/WhatsAppFAB';
+import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
 export default function MainTabNavigator() {
     const { user } = useAuth();
     const { colors, theme } = useTheme();
     const { cartCount } = useCart();
+    const { t } = useLanguage();
 
     return (
         <View style={{ flex: 1 }}>
             <Tab.Navigator
                 screenOptions={({ route }) => ({
                     headerShown: true,
-                    headerTitle: user ? `Hola, ${user.name}` : 'MuitoWork',
-                    headerRight: () => <ThemeToggle />,
+                    headerTitle: user ? `${t('Hola')}, ${user.name}` : 'MuitoWork',
+                    headerRight: () => (
+                        <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                            <LanguageSelector />
+                            <ThemeToggle />
+                        </View>
+                    ),
                     headerStyle: {
                         backgroundColor: colors.card,
                         shadowColor: 'transparent',
@@ -100,6 +108,24 @@ export default function MainTabNavigator() {
                                     </View>
                                 )}
                             </View>
+                        );
+                    },
+                    tabBarLabel: ({ focused, color }) => {
+                        const label = t(route.name);
+                        return (
+                            <Text
+                                numberOfLines={1}
+                                adjustsFontSizeToFit
+                                style={{
+                                    color,
+                                    fontSize: 10,
+                                    fontWeight: focused ? '600' : '400',
+                                    textAlign: 'center',
+                                    width: '100%'
+                                }}
+                            >
+                                {label}
+                            </Text>
                         );
                     },
                 })}

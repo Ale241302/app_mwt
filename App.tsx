@@ -4,6 +4,7 @@ import React, { useEffect } from 'react';
 import 'react-native-gesture-handler';
 import { AuthProvider } from './src/context/AuthContext';
 import { CartProvider } from './src/context/CartContext';
+import { LanguageProvider } from './src/context/LanguageContext';
 import { ThemeProvider } from './src/context/ThemeContext';
 import RootNavigator from './src/navigation/RootNavigator';
 import { checkPermissions, registerBackgroundFetchAsync } from './src/utils/BackgroundService';
@@ -44,15 +45,15 @@ export default function App() {
     }, []);
 
     return (
-        <AuthProvider>
-            <ThemeProvider>
-                <CartProvider>
-                    <StatusBar style="auto" />
-                    <RootNavigator />
-                </CartProvider>
-            </ThemeProvider>
-        </AuthProvider>
+        <LanguageProvider>
+            <AuthProvider>
+                <ThemeProvider>
+                    <CartProvider>
+                        <StatusBar style="auto" />
+                        <RootNavigator />
+                    </CartProvider>
+                </ThemeProvider>
+            </AuthProvider>
+        </LanguageProvider>
     );
 }
-
-

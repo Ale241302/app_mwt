@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { ActivityIndicator, Alert, Dimensions, Image, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -12,17 +13,18 @@ export default function LoginScreen() {
     const [showPassword, setShowPassword] = useState(false);
     const [loading, setLoading] = useState(false);
     const { signIn } = useAuth();
+    const { t } = useLanguage();
 
     const handleLogin = async () => {
         if (!email || !password) {
-            Alert.alert('Error', 'Por favor ingrese email y contraseña');
+            Alert.alert(t('Error'), t('Por favor ingrese email y contraseña'));
             return;
         }
         setLoading(true);
         const result = await signIn(email, password);
         setLoading(false);
         if (!result.success) {
-            Alert.alert('Error', result.message);
+            Alert.alert(t('Error'), result.message);
         }
     };
 
@@ -52,7 +54,7 @@ export default function LoginScreen() {
                 <View style={styles.formContainer}>
                     <TextInput
                         style={styles.input}
-                        placeholder="Email"
+                        placeholder={t('Correo electrónico')}
                         placeholderTextColor="#rgba(255,255,255,0.7)"
                         value={email}
                         onChangeText={setEmail}
@@ -63,7 +65,7 @@ export default function LoginScreen() {
                     <View style={styles.passwordContainer}>
                         <TextInput
                             style={styles.passwordInput}
-                            placeholder="Contraseña"
+                            placeholder={t('Contraseña')}
                             placeholderTextColor="#rgba(255,255,255,0.7)"
                             value={password}
                             onChangeText={setPassword}
@@ -85,7 +87,7 @@ export default function LoginScreen() {
                         {loading ? (
                             <ActivityIndicator color="#000" />
                         ) : (
-                            <Text style={styles.buttonText}>Iniciar Sesión</Text>
+                            <Text style={styles.buttonText}>{t('Iniciar Sesión')}</Text>
                         )}
                     </TouchableOpacity>
                 </View>

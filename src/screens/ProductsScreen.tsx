@@ -7,6 +7,7 @@ import Svg, { Defs, FeColorMatrix, Filter, Image as SvgImage } from 'react-nativ
 import BinocularsIcon from '../components/BinocularsIcon';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
 
@@ -101,6 +102,7 @@ export default function ProductsScreen() {
     const navigation = useNavigation<any>();
     const { user } = useAuth();
     const { colors, theme } = useTheme();
+    const { t } = useLanguage();
     // Re-calculate styles when theme changes isn't automatic with this pattern unless we pass theme, 
     // but colors updates.
     // However, styles object is constant for valid lifecycle. 
@@ -197,7 +199,10 @@ export default function ProductsScreen() {
             if (Array.isArray(val)) return val.map(v => v.text);
             return [];
         });
-        return Array.from(new Set(allValues.filter(v => v))).sort();
+        // Get unique values and sort them
+        const uniqueValues = Array.from(new Set(allValues.filter(v => v)));
+        // Sort translated values
+        return uniqueValues.sort((a, b) => t(a).localeCompare(t(b)));
     };
 
     const getAttributeImage = (attr: ProductAttribute[] | undefined) => {
@@ -282,7 +287,7 @@ export default function ProductsScreen() {
             <View style={styles.searchContainer}>
                 <Ionicons name="search" size={20} color={colors.subtext} style={{ marginRight: 10 }} />
                 <TextInput
-                    placeholder="Buscar productos..."
+                    placeholder={t('Buscar productos...')}
                     placeholderTextColor={colors.subtext}
                     style={styles.searchInput}
                     value={search}
@@ -321,7 +326,7 @@ export default function ProductsScreen() {
 
                     <View style={styles.sideMenu}>
                         <View style={styles.sideMenuHeader}>
-                            <Text style={styles.sideMenuTitle}>Filtrar por</Text>
+                            <Text style={styles.sideMenuTitle}>{t('Filtrar por')}</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
                                 <Ionicons name="close" size={24} color={colors.text} />
                             </TouchableOpacity>
@@ -336,7 +341,7 @@ export default function ProductsScreen() {
 
                                 return (
                                     <View key={cat.key} style={styles.filterCategoryContainer}>
-                                        <Text style={styles.filterCategoryTitle}>{cat.label}</Text>
+                                        <Text style={styles.filterCategoryTitle}>{t(cat.label)}</Text>
                                         {options.map((option: any) => {
                                             const isChecked = selectedFilters[cat.key]?.includes(option);
                                             return (
@@ -348,7 +353,7 @@ export default function ProductsScreen() {
                                                     <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
                                                         {isChecked && <Ionicons name="checkmark" size={14} color="#fff" />}
                                                     </View>
-                                                    <Text style={styles.filterOptionText}>{option}</Text>
+                                                    <Text style={styles.filterOptionText}>{t(option)}</Text>
                                                 </TouchableOpacity>
                                             );
                                         })}

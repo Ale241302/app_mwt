@@ -4,12 +4,14 @@ import { ActivityIndicator, StyleSheet, Text, TouchableOpacity, View } from 'rea
 import { GestureHandlerRootView, PanGestureHandler, State } from 'react-native-gesture-handler';
 import { WebView } from 'react-native-webview';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
 export default function OrderWebViewScreen({ route, navigation }: any) {
     const { orderNumber } = route.params;
     const { colors, theme } = useTheme();
     const { user } = useAuth();
+    const { t, urlPrefix } = useLanguage();
     const styles = getStyles(colors);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(false);
@@ -36,7 +38,18 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
         }
     };
 
-    const webViewUrl = `https://mwt.one/es/?option=com_sppagebuilder&view=page&id=84&order_number=${orderNumber}&user_id=${user?.id || ''}`;
+    // URL ID mapping per language for Detail page
+    const getPageId = () => {
+        switch (urlPrefix) {
+            case 'es': return '84';
+            case 'us': return '94';
+            case 'fr': return '96';
+            case 'pt': return '95';
+            default: return '84';
+        }
+    };
+
+    const webViewUrl = `https://mwt.one/${urlPrefix}/?option=com_sppagebuilder&view=page&id=${getPageId()}&order_number=${orderNumber}&user_id=${user?.id || ''}`;
 
     const injectedJavaScript = React.useMemo(() => {
         // CSS para modo oscuro (Dark Mode)
@@ -294,7 +307,7 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
                         renderLoading={() => (
                             <View style={styles.loadingContainer}>
                                 <ActivityIndicator size="large" color={colors.primary} />
-                                <Text style={styles.loadingText}>Cargando rastreo...</Text>
+                                <Text style={styles.loadingText}>{t('Cargando rastreo...')}</Text>
                             </View>
                         )}
                     />
@@ -303,9 +316,9 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
                     {error && (
                         <View style={styles.errorContainer}>
                             <Ionicons name="alert-circle" size={64} color={colors.subtext} />
-                            <Text style={styles.errorTitle}>Error al cargar</Text>
+                            <Text style={styles.errorTitle}>{t('Error al cargar')}</Text>
                             <Text style={styles.errorMessage}>
-                                No se pudo cargar la página de rastreo
+                                {t('No se pudo cargar la página de rastreo')}
                             </Text>
                             <TouchableOpacity
                                 style={styles.retryButton}
@@ -314,7 +327,7 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
                                     setLoading(true);
                                 }}
                             >
-                                <Text style={styles.retryButtonText}>Reintentar</Text>
+                                <Text style={styles.retryButtonText}>{t('Reintentar')}</Text>
                             </TouchableOpacity>
                         </View>
                     )}
@@ -323,7 +336,7 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
                     {loading && !error && (
                         <View style={styles.loadingOverlay}>
                             <ActivityIndicator size="large" color={colors.primary} />
-                            <Text style={styles.loadingText}>Cargando...</Text>
+                            <Text style={styles.loadingText}>{t('Cargando...')}</Text>
                         </View>
                     )}
                 </View>

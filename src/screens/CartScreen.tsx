@@ -7,6 +7,7 @@ import { ActivityIndicator, Alert, Dimensions, Image, RefreshControl, ScrollView
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -46,6 +47,7 @@ export default function CartScreen() {
     const navigation = useNavigation<any>();
     const route = useRoute<any>();
     const { colors } = useTheme();
+    const { t } = useLanguage();
     const styles = getStyles(colors);
     const [cartData, setCartData] = useState<CartProduct[]>([]);
     const [groupedCart, setGroupedCart] = useState<GroupedCartItem[]>([]);
@@ -88,7 +90,7 @@ export default function CartScreen() {
             }
         } catch (error) {
             console.error('Error fetching cart:', error);
-            Alert.alert('Error', 'No se pudo cargar el carrito');
+            Alert.alert(t('Error'), t('No se pudo cargar el carrito'));
         } finally {
             setLoading(false);
             setRefreshing(false);
@@ -175,12 +177,12 @@ export default function CartScreen() {
                 fetchCart();
                 refreshCart(); // Update global count
             } else {
-                Alert.alert('Error', response.data.message || 'No se pudo actualizar la cantidad');
+                Alert.alert(t('Error'), response.data.message || t('No se pudo actualizar la cantidad'));
                 fetchCart();
             }
         } catch (error) {
             console.error('Error updating quantity:', error);
-            Alert.alert('Error', 'Falló la actualización de cantidad');
+            Alert.alert(t('Error'), t('Falló la actualización de cantidad'));
             fetchCart();
         } finally {
             setUpdatingQuantity(null);
@@ -225,12 +227,12 @@ export default function CartScreen() {
 
     const handleDelete = (productId: string) => {
         Alert.alert(
-            'Eliminar producto',
-            '¿Estás seguro de que deseas eliminar este producto del carrito?',
+            t('Eliminar producto'),
+            t('¿Estás seguro de que deseas eliminar este producto del carrito?'),
             [
-                { text: 'Cancelar', style: 'cancel' },
+                { text: t('Cancelar'), style: 'cancel' },
                 {
-                    text: 'Eliminar',
+                    text: t('Eliminar'),
                     style: 'destructive',
                     onPress: async () => performDelete(productId)
                 }
@@ -250,15 +252,15 @@ export default function CartScreen() {
             });
 
             if (response.data && response.data.success) {
-                Alert.alert('Eliminado', response.data.message);
+                Alert.alert(t('Eliminado'), response.data.message);
                 fetchCart();
                 refreshCart(); // Update global count
             } else {
-                Alert.alert('Error', response.data.message || 'No se pudo eliminar');
+                Alert.alert(t('Error'), response.data.message || t('No se pudo eliminar'));
             }
         } catch (error) {
             console.error('Error deleting item:', error);
-            Alert.alert('Error', 'Falló la conexión al eliminar');
+            Alert.alert(t('Error'), t('Falló la conexión al eliminar'));
         }
     };
 
@@ -268,12 +270,12 @@ export default function CartScreen() {
 
     const handleBuyNow = async () => {
         if (!user || !cartId) {
-            Alert.alert('Error', 'No se encontró información del carrito');
+            Alert.alert(t('Error'), t('No se encontró información del carrito'));
             return;
         }
 
         if (groupedCart.length === 0) {
-            Alert.alert('Carrito vacío', 'Agrega productos antes de comprar');
+            Alert.alert(t('Carrito vacío'), t('Agrega productos antes de comprar'));
             return;
         }
 
@@ -287,15 +289,15 @@ export default function CartScreen() {
             });
 
             if (response.data && response.data.success) {
-                Alert.alert('Éxito', response.data.message || 'Compra realizada con éxito');
+                Alert.alert(t('Éxito'), response.data.message || t('Compra realizada con éxito'));
                 fetchCart();
                 refreshCart(); // Update global count is empty
             } else {
-                Alert.alert('Error', response.data.message || 'No se pudo completar la compra');
+                Alert.alert(t('Error'), response.data.message || t('No se pudo completar la compra'));
             }
         } catch (error) {
             console.error('Error completing purchase:', error);
-            Alert.alert('Error', 'Falló la conexión al procesar la compra');
+            Alert.alert(t('Error'), t('Falló la conexión al procesar la compra'));
         } finally {
             setBuyingNow(false);
         }
@@ -312,8 +314,8 @@ export default function CartScreen() {
     return (
         <View style={styles.container}>
             <View style={styles.header}>
-                <Text style={styles.headerTitle}>Tu Pedido</Text>
-                <Text style={styles.headerTotal}>Total: ${totalAmount}</Text>
+                <Text style={styles.headerTitle}>{t('Tu Pedido')}</Text>
+                <Text style={styles.headerTotal}>{t('Total')}: ${totalAmount}</Text>
             </View>
 
             <ScrollView
@@ -323,7 +325,7 @@ export default function CartScreen() {
                 {groupedCart.length === 0 ? (
                     <View style={styles.emptyContainer}>
                         <Ionicons name="cart-outline" size={64} color={colors.subtext} />
-                        <Text style={styles.emptyText}>Tu carrito está vacío</Text>
+                        <Text style={styles.emptyText}>{t('Tu carrito está vacío')}</Text>
                     </View>
                 ) : (
                     groupedCart.map((group) => (
@@ -338,8 +340,8 @@ export default function CartScreen() {
                                     <Text style={styles.groupName}>{group.product_name}</Text>
                                     <Text style={styles.groupCode}>SKU: {group.product_code}</Text>
                                     <View style={styles.groupStats}>
-                                        <Text style={styles.groupStatText}>Cant Total: {group.total_quantity}</Text>
-                                        <Text style={styles.groupStatText}>Subtotal: ${group.total_subtotal.toFixed(2)}</Text>
+                                        <Text style={styles.groupStatText}>{t('Cant Total')}: {group.total_quantity}</Text>
+                                        <Text style={styles.groupStatText}>{t('Subtotal')}: ${group.total_subtotal.toFixed(2)}</Text>
                                     </View>
                                 </View>
                             </TouchableOpacity>
@@ -349,10 +351,10 @@ export default function CartScreen() {
                                     <View key={item.cart_product_id} style={styles.variantRow}>
                                         <View style={styles.variantInfo}>
                                             <Text style={styles.variantText}>
-                                                {item.characteristics[0]?.characteristic_value || 'Variante'}
+                                                {t(item.characteristics[0]?.characteristic_value) || t('Variante')}
                                             </Text>
                                             <Text style={styles.variantSubtext}>
-                                                ${parseFloat(item.product_sort_price).toFixed(2)} un.
+                                                ${parseFloat(item.product_sort_price).toFixed(2)} {t('un.')}
                                             </Text>
                                         </View>
 
@@ -398,12 +400,13 @@ export default function CartScreen() {
                         {buyingNow ? (
                             <ActivityIndicator color="#fff" />
                         ) : (
-                            <Text style={styles.buyButtonText}>Comprar</Text>
+                            <Text style={styles.buyButtonText}>{t('Comprar')}</Text>
                         )}
                     </TouchableOpacity>
                 </View>
-            )}
-        </View>
+            )
+            }
+        </View >
     );
 }
 

@@ -5,6 +5,7 @@ import React, { useEffect, useState } from 'react';
 import { ActivityIndicator, Dimensions, Modal, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
 interface Order {
@@ -40,6 +41,7 @@ export default function OrdersScreen() {
     const navigation = useNavigation<any>();
     const { user } = useAuth();
     const { colors } = useTheme(); // Use Theme Context
+    const { t } = useLanguage();
     const styles = getStyles(colors); // Get dynamic styles
     const [orders, setOrders] = useState<Order[]>([]);
     const [filteredOrders, setFilteredOrders] = useState<Order[]>([]);
@@ -55,13 +57,13 @@ export default function OrdersScreen() {
     const [selectedOperator, setSelectedOperator] = useState<string>(''); // '' = all, '0' = Cliente, '1' = Muito Work Limitada
 
     const STATUS_FILTERS: Record<string, string[]> = {
-        'Creación': ['confirmed'],
-        'Crédito': ['credito'],
-        'Producción': ['produccion'],
-        'Preparación': ['preparacion'],
-        'Despacho': ['despacho'],
-        'Tránsito': ['transito'],
-        'En Destino': ['pagado'],
+        [t('Creación')]: ['confirmed'],
+        [t('Crédito')]: ['credito'],
+        [t('Producción')]: ['produccion'],
+        [t('Preparación')]: ['preparacion'],
+        [t('Despacho')]: ['despacho'],
+        [t('Tránsito')]: ['transito'],
+        [t('En Destino')]: ['pagado'],
     };
 
     const { width } = Dimensions.get('window');
@@ -222,7 +224,7 @@ export default function OrdersScreen() {
             <View style={styles.searchContainer}>
                 <Ionicons name="search" size={20} color={colors.subtext} style={{ marginRight: 10 }} />
                 <TextInput
-                    placeholder="Buscar pedido..."
+                    placeholder={t('Buscar pedido...')}
                     placeholderTextColor={colors.subtext}
                     style={styles.searchInput}
                     value={search}
@@ -250,7 +252,7 @@ export default function OrdersScreen() {
                                 onPress={() => toggleSection(status)}
                                 activeOpacity={0.7}
                             >
-                                <Text style={styles.sectionTitle}>{status}</Text>
+                                <Text style={styles.sectionTitle}>{t(status)}</Text>
                                 <Ionicons
                                     name={isExpanded ? "remove" : "add"}
                                     size={24}
@@ -282,22 +284,22 @@ export default function OrdersScreen() {
 
                                             <View style={styles.cardBody}>
                                                 {order.preforma_number_purchase && order.preforma_number_purchase !== 'null' && (
-                                                    <Text style={styles.textRow}><Text style={styles.label}>OC: </Text>{order.preforma_number_purchase}</Text>
+                                                    <Text style={styles.textRow}><Text style={styles.label}>{t('OC')}: </Text>{order.preforma_number_purchase}</Text>
                                                 )}
                                                 {order.sap_number_preformar && order.sap_number_preformar !== 'null' && (
-                                                    <Text style={styles.textRow}><Text style={styles.label}>SAP: </Text>{order.sap_number_preformar}</Text>
+                                                    <Text style={styles.textRow}><Text style={styles.label}>{t('SAP')}: </Text>{order.sap_number_preformar}</Text>
                                                 )}
                                                 {order.sap_number_preforma_mwt && order.sap_number_preforma_mwt !== 'null' && (
-                                                    <Text style={styles.textRow}><Text style={styles.label}>Proforma Muito Work: </Text>{order.sap_number_preforma_mwt}</Text>
+                                                    <Text style={styles.textRow}><Text style={styles.label}>{t('Proforma Muito Work')}: </Text>{order.sap_number_preforma_mwt}</Text>
                                                 )}
                                                 {order.sap_number_preforma && order.sap_number_preforma !== 'null' && (
-                                                    <Text style={styles.textRow}><Text style={styles.label}>Proforma: </Text>{order.sap_number_preforma}</Text>
+                                                    <Text style={styles.textRow}><Text style={styles.label}>{t('Proforma')}: </Text>{order.sap_number_preforma}</Text>
                                                 )}
                                                 {order.prod_fechai && order.prod_fechai !== 'null' && (
-                                                    <Text style={styles.textRow}><Text style={styles.label}>Producción: </Text>{order.prod_fechai}</Text>
+                                                    <Text style={styles.textRow}><Text style={styles.label}>{t('Producción')}: </Text>{order.prod_fechai}</Text>
                                                 )}
                                                 {order.cust_customer_name && order.cust_customer_name !== 'null' && (
-                                                    <Text style={styles.textRow}><Text style={styles.label}>Cliente: </Text>{order.cust_customer_name}</Text>
+                                                    <Text style={styles.textRow}><Text style={styles.label}>{t('Cliente')}: </Text>{order.cust_customer_name}</Text>
                                                 )}
                                             </View>
                                         </View>
@@ -321,14 +323,14 @@ export default function OrdersScreen() {
                     <TouchableOpacity style={styles.modalBackdrop} onPress={() => setModalVisible(false)} />
                     <View style={[styles.sideMenu, { width: width * 0.75 }]}>
                         <View style={styles.sideMenuHeader}>
-                            <Text style={styles.sideMenuTitle}>Filtrar por</Text>
+                            <Text style={styles.sideMenuTitle}>{t('Filtrar por')}</Text>
                             <TouchableOpacity onPress={() => setModalVisible(false)}>
                                 <Ionicons name="close" size={24} color={colors.text} />
                             </TouchableOpacity>
                         </View>
 
                         <ScrollView style={styles.filterScroll} showsVerticalScrollIndicator={false}>
-                            <Text style={styles.filterCategoryTitle}>Estados</Text>
+                            <Text style={styles.filterCategoryTitle}>{t('Estados')}</Text>
                             <View style={{ marginBottom: 20 }}>
                                 {Object.keys(STATUS_FILTERS).map(filter => {
                                     const isChecked = selectedStatusFilters.includes(filter);
@@ -350,7 +352,7 @@ export default function OrdersScreen() {
                             {/* Operator Filter - Only visible for administrators */}
                             {isAdministrator && (
                                 <>
-                                    <Text style={styles.filterCategoryTitle}>Operador</Text>
+                                    <Text style={styles.filterCategoryTitle}>{t('Operador')}</Text>
                                     <View style={{ marginBottom: 20 }}>
                                         <TouchableOpacity
                                             style={styles.filterOption}
@@ -359,7 +361,7 @@ export default function OrdersScreen() {
                                             <View style={[styles.checkbox, selectedOperator === '0' && styles.checkboxChecked]}>
                                                 {selectedOperator === '0' && <Ionicons name="checkmark" size={14} color="#fff" />}
                                             </View>
-                                            <Text style={styles.filterOptionText}>Cliente</Text>
+                                            <Text style={styles.filterOptionText}>{t('Cliente')}</Text>
                                         </TouchableOpacity>
                                         <TouchableOpacity
                                             style={styles.filterOption}
@@ -374,7 +376,7 @@ export default function OrdersScreen() {
                                 </>
                             )}
 
-                            <Text style={styles.filterCategoryTitle}>Clientes</Text>
+                            <Text style={styles.filterCategoryTitle}>{t('Clientes')}</Text>
                             {getUniqueCustomers().map(customer => {
                                 const isChecked = selectedCustomers.includes(customer);
                                 return (

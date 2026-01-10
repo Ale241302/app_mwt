@@ -7,6 +7,7 @@ import Svg, { Defs, FeColorMatrix, Filter, Image as SvgImage } from 'react-nativ
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { useLanguage } from '../context/LanguageContext';
 import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -105,6 +106,7 @@ export default function ProductDetailScreen({ route, navigation }: any) {
     const { user } = useAuth();
     const { refreshCart } = useCart();
     const { colors, theme } = useTheme();
+    const { t } = useLanguage();
     const styles = getStyles(colors);
     const [product, setProduct] = useState<ProductDetail | null>(null);
     const [loading, setLoading] = useState(true);
@@ -122,9 +124,10 @@ export default function ProductDetailScreen({ route, navigation }: any) {
     const getAttributeText = (attr: ProductAttribute[] | string | undefined) => {
         if (!attr) return '';
         if (Array.isArray(attr)) {
-            return attr.length > 0 ? attr[0].text : '';
+            const text = attr.length > 0 ? attr[0].text : '';
+            return t(text); // Translate attribute text
         }
-        return attr;
+        return t(attr); // Translate if it's a string
     };
 
     const getAttributeData = (attr: ProductAttribute[] | string | undefined): { url: string, text: string }[] => {
@@ -180,7 +183,7 @@ export default function ProductDetailScreen({ route, navigation }: any) {
         });
 
         if (variantsToAdd.length === 0) {
-            Alert.alert('Atención', 'Seleccione al menos una cantidad.');
+            Alert.alert(t('Atención'), t('Seleccione al menos una cantidad.'));
             return;
         }
 
@@ -212,13 +215,13 @@ export default function ProductDetailScreen({ route, navigation }: any) {
                 }
             }
 
-            Alert.alert('Éxito', 'Productos agregados al carrito.');
+            Alert.alert(t('Éxito'), t('Productos agregados al carrito.'));
             setQuantities({}); // Reset quantities
             await refreshCart(); // Update cart badge count immediately
         } catch (error) {
             console.error('Error adding to cart:', error);
             // Here you might add to offline queue if you had the logic imported
-            Alert.alert('Error', 'Hubo un problema al agregar al carrito.');
+            Alert.alert(t('Error'), t('Hubo un problema al agregar al carrito.'));
         } finally {
             setAddingToCart(false);
         }
@@ -235,7 +238,7 @@ export default function ProductDetailScreen({ route, navigation }: any) {
     if (!product) {
         return (
             <View style={styles.center}>
-                <Text>Producto no encontrado</Text>
+                <Text>{t('Producto no encontrado')}</Text>
             </View>
         );
     }
@@ -332,12 +335,12 @@ export default function ProductDetailScreen({ route, navigation }: any) {
                                             onPress={() => Linking.openURL(pdfFile.file_url)}
                                         >
                                             <Ionicons name="document-text" size={20} color={colors.background} style={{ marginRight: 5 }} />
-                                            <Text style={styles.pdfButtonText}>Descargar Ficha</Text>
+                                            <Text style={styles.pdfButtonText}>{t('Descargar ficha')}</Text>
                                         </TouchableOpacity>
                                     )}
                                     {product.product_sort_price && (
                                         <Text style={styles.priceText}>
-                                            Valor ${parseFloat(product.product_sort_price).toFixed(2)} USD
+                                            {t('Valor')} ${parseFloat(product.product_sort_price).toFixed(2)} USD
                                         </Text>
                                     )}
                                 </View>
@@ -347,7 +350,7 @@ export default function ProductDetailScreen({ route, navigation }: any) {
 
                     {/* Right Column: Specifications */}
                     <View style={styles.rightColumn}>
-                        <Text style={styles.specsTitle}>Especificaciones</Text>
+                        <Text style={styles.specsTitle}>{t('Especificaciones')}</Text>
 
                         <View style={styles.iconsContainer}>
                             {Array.from(uniqueIconsMap.entries()).map(([url, text], index) => (
@@ -378,7 +381,7 @@ export default function ProductDetailScreen({ route, navigation }: any) {
                         {/* Fallback for Color (usually has no icon but implies visual) - keep as text if desired, or skip */}
                         {getAttributeText(product.product_color) ? (
                             <View style={styles.specItem}>
-                                <Text style={styles.specLabel}>Color</Text>
+                                <Text style={styles.specLabel}>{t('Color')}</Text>
                                 <Text style={styles.specValue}>{getAttributeText(product.product_color)}</Text>
                             </View>
                         ) : null}
@@ -389,8 +392,8 @@ export default function ProductDetailScreen({ route, navigation }: any) {
                 {/* Variants Table */}
                 <View style={styles.tableContainer}>
                     <View style={styles.tableHeader}>
-                        <Text style={styles.tableRefTitle}>Tallas Marluvas Composite</Text>
-                        <Text style={styles.tableQtyTitle}>Cant.</Text>
+                        <Text style={styles.tableRefTitle}>{t('Tallas Marluvas Composite')}</Text>
+                        <Text style={styles.tableQtyTitle}>{t('Cant.')}</Text>
                     </View>
 
                     {product.variants.map((variant, index) => {
@@ -427,7 +430,7 @@ export default function ProductDetailScreen({ route, navigation }: any) {
                     {addingToCart ? (
                         <ActivityIndicator color="#fff" />
                     ) : (
-                        <Text style={styles.addButtonText}>Añadir a tu pedido</Text>
+                        <Text style={styles.addButtonText}>{t('Añadir a tu pedido')}</Text>
                     )}
                 </TouchableOpacity>
             </View>
