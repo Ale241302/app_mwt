@@ -23,18 +23,20 @@ interface Order {
 
 import BinocularsIcon from '../components/BinocularsIcon';
 
-// Normalize status to group similar statuses together
+// Normalize status to allow translation keys (no grouping)
 const normalizeStatus = (status: string): string => {
-    const normalized: Record<string, string> = {
-        'credito': 'Creación/Producción',
-        'confirmed': 'Creación/Producción',
-        'produccion': 'Creación/Producción',
-        'preparacion': 'Preparación/Despacho',
-        'despacho': 'Preparación/Despacho',
+    const map: Record<string, string> = {
+        'credito': 'Crédito',
+        'confirmed': 'Confirmado',
+        'produccion': 'Producción',
+        'preparacion': 'Preparación',
+        'despacho': 'Despacho',
         'transito': 'Tránsito',
         'pagado': 'En Destino',
+        'archivada': 'Archivados',
     };
-    return normalized[status?.toLowerCase()] || 'Otros';
+    // Return mapped status or Capitalized original
+    return map[status?.toLowerCase()] || status;
 };
 
 export default function OrdersScreen() {
@@ -57,13 +59,14 @@ export default function OrdersScreen() {
     const [selectedOperator, setSelectedOperator] = useState<string>(''); // '' = all, '0' = Cliente, '1' = Muito Work Limitada
 
     const STATUS_FILTERS: Record<string, string[]> = {
-        [t('Creación')]: ['confirmed'],
+        [t('Confirmado')]: ['confirmed'],
         [t('Crédito')]: ['credito'],
         [t('Producción')]: ['produccion'],
         [t('Preparación')]: ['preparacion'],
         [t('Despacho')]: ['despacho'],
         [t('Tránsito')]: ['transito'],
         [t('En Destino')]: ['pagado'],
+        [t('Archivados')]: ['archivada'],
     };
 
     const { width } = Dimensions.get('window');
@@ -190,18 +193,41 @@ export default function OrdersScreen() {
     // Check if user is administrator
     const isAdministrator = user?.group_titles?.includes('Administrator') || false;
 
-    // Grouping Logic: Group by NORMALIZED status
-    const groupedOrders = filteredOrders.reduce((acc, order) => {
-        const normalizedStatus = normalizeStatus(order.order_status);
-        if (!acc[normalizedStatus]) {
-            acc[normalizedStatus] = [];
-        }
-        acc[normalizedStatus].push(order);
-        return acc;
-    }, {} as Record<string, Order[]>);
-
     // Sort groups by custom order
-    const statusOrder = ['Creación/Producción', 'Preparación/Despacho', 'Tránsito', 'En Destino', 'Otros'];
+    const statusOrder = [
+        'Confirmado',
+        'Crédito',
+        'Producción',
+        'Preparación',
+        'Despacho',
+        'Tránsito',
+        'En Destino',
+        'Archivados'
+    ];
+
+    // Grouping Logic: Group by NORMALIZED status
+    // Initialize with all statuses to ensure they appear even if empty
+    const groupedOrders: Record<string, Order[]> = {};
+    statusOrder.forEach(status => {
+        groupedOrders[status] = [];
+    });
+
+    filteredOrders.forEach(order => {
+        const normalizedStatus = normalizeStatus(order.order_status);
+        if (!groupedOrders[normalizedStatus]) {
+            // Handle cases that might fall into 'Otros' or unexpected statuses not in initial list 
+            // (though normalizeStatus defaults to 'Otros' or the status itself)
+            // If it's not in our explicit statusOrder list, we might want to put it in 'Otros' or add it dynamically.
+            // Given normalizeStatus logic, unexpected ones fallback to 'Otros' or the string.
+            // Ideally normalizeStatus should map everything to our known keys + Others.
+            // If normalizeStatus returns something not in statusOrder (like a new status), add it.
+            groupedOrders[normalizedStatus] = [];
+        }
+        groupedOrders[normalizedStatus].push(order);
+    });
+
+    // We can just use statusOrder for rendering keys, 
+    // but we should also include any extra keys that might have been added dynamically (though unlikely with current normalizeStatus)
     const sortedGroupKeys = Object.keys(groupedOrders).sort((a, b) => {
         const indexA = statusOrder.indexOf(a);
         const indexB = statusOrder.indexOf(b);
@@ -253,11 +279,18 @@ export default function OrdersScreen() {
                                 activeOpacity={0.7}
                             >
                                 <Text style={styles.sectionTitle}>{t(status)}</Text>
-                                <Ionicons
-                                    name={isExpanded ? "remove" : "add"}
-                                    size={24}
-                                    color={colors.text}
-                                />
+                                <View style={styles.headerRight}>
+                                    <View style={styles.badgeContainer}>
+                                        <Text style={styles.badgeText}>
+                                            {groupedOrders[status].length}
+                                        </Text>
+                                    </View>
+                                    <Ionicons
+                                        name={isExpanded ? "remove" : "add"}
+                                        size={24}
+                                        color={colors.text}
+                                    />
+                                </View>
                             </TouchableOpacity>
 
                             {isExpanded && (
@@ -455,6 +488,25 @@ const getStyles = (colors: any) => StyleSheet.create({
         fontSize: 20,
         fontWeight: 'bold',
         color: colors.text,
+    },
+    headerRight: {
+        flexDirection: 'row',
+        alignItems: 'center',
+    },
+    badgeContainer: {
+        backgroundColor: '#10b981',
+        borderRadius: 12,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+        marginRight: 10,
+        minWidth: 24,
+        alignItems: 'center',
+        justifyContent: 'center',
+    },
+    badgeText: {
+        color: '#fff',
+        fontSize: 12,
+        fontWeight: 'bold',
     },
     cardsContainer: {
         gap: 12,
