@@ -15,7 +15,8 @@
       "adaptiveIcon": {
         "backgroundColor": "#ffffff",
         "foregroundImage": "./assets/adaptive-icon.png"
-      }
+      },
+      "package": "com.anonymous.app_mwt"
     },
     "web": {
       "output": "static",
@@ -30,7 +31,8 @@
           "resizeMode": "contain",
           "backgroundColor": "#ffffff"
         }
-      ]
+      ],
+      "expo-task-manager"
     ],
     "experiments": {
       "reactCompiler": true

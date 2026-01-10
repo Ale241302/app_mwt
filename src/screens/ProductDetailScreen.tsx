@@ -6,6 +6,7 @@ import { ActivityIndicator, Alert, Dimensions, Image, Linking, ScrollView, Style
 import Svg, { Defs, FeColorMatrix, Filter, Image as SvgImage } from 'react-native-svg';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
+import { useCart } from '../context/CartContext';
 import { useTheme } from '../context/ThemeContext';
 
 const { width } = Dimensions.get('window');
@@ -102,6 +103,7 @@ interface ProductDetail {
 export default function ProductDetailScreen({ route, navigation }: any) {
     const { productId } = route.params;
     const { user } = useAuth();
+    const { refreshCart } = useCart();
     const { colors, theme } = useTheme();
     const styles = getStyles(colors);
     const [product, setProduct] = useState<ProductDetail | null>(null);
@@ -212,6 +214,7 @@ export default function ProductDetailScreen({ route, navigation }: any) {
 
             Alert.alert('Éxito', 'Productos agregados al carrito.');
             setQuantities({}); // Reset quantities
+            await refreshCart(); // Update cart badge count immediately
         } catch (error) {
             console.error('Error adding to cart:', error);
             // Here you might add to offline queue if you had the logic imported

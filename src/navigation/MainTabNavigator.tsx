@@ -119,7 +119,18 @@ export default function MainTabNavigator() {
                         },
                     })}
                 />
-                <Tab.Screen name="Carrito" component={CartScreen} />
+                <Tab.Screen
+                    name="Carrito"
+                    component={CartScreen}
+                    listeners={({ navigation }) => ({
+                        tabPress: (e) => {
+                            if (navigation.isFocused()) {
+                                e.preventDefault();
+                                navigation.setParams({ refreshTs: Date.now() });
+                            }
+                        },
+                    })}
+                />
                 <Tab.Screen name="Salir" component={LogoutComponent} options={{ headerShown: false }} />
             </Tab.Navigator>
             <WhatsAppFAB />

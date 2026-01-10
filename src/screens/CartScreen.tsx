@@ -1,8 +1,8 @@
 import { Ionicons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { useNavigation } from '@react-navigation/native';
+import { useFocusEffect, useNavigation, useRoute } from '@react-navigation/native';
 import axios from 'axios';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import { ActivityIndicator, Alert, Dimensions, Image, RefreshControl, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 import { Config } from '../constants/Config';
 import { useAuth } from '../context/AuthContext';
@@ -44,6 +44,7 @@ export default function CartScreen() {
     const { user } = useAuth();
     const { refreshCart } = useCart();
     const navigation = useNavigation<any>();
+    const route = useRoute<any>();
     const { colors } = useTheme();
     const styles = getStyles(colors);
     const [cartData, setCartData] = useState<CartProduct[]>([]);
@@ -120,10 +121,13 @@ export default function CartScreen() {
         setGroupedCart(Object.values(groups));
     };
 
-    useEffect(() => {
-        fetchCart();
-        refreshCart(); // Ensure global count is sync on enter
-    }, [user]);
+    useFocusEffect(
+        useCallback(() => {
+            // Se ejecuta cada vez que navegas a esta pantalla
+            fetchCart();
+            refreshCart(); // Ensure global count is in sync
+        }, [user])
+    );
 
     const onRefresh = () => {
         setRefreshing(true);

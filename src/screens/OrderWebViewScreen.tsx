@@ -249,6 +249,8 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
             <PanGestureHandler
                 onHandlerStateChange={onHandlerStateChange}
                 activeOffsetX={[-20, 20]}
+                activeOffsetY={[-50, 50]}
+                failOffsetY={[-50, 50]}
             >
                 <View style={styles.container}>
                     {/* Header */}

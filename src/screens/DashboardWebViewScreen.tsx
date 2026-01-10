@@ -6,8 +6,8 @@ import { WebView } from 'react-native-webview';
 import { useAuth } from '../context/AuthContext';
 import { useTheme } from '../context/ThemeContext';
 
+
 export default function DashboardWebViewScreen({ route, navigation }: any) {
-    // orderNumber is optional - only used if navigating from OrdersScreen
     const orderNumber = route?.params?.orderNumber;
     const { colors, theme } = useTheme();
     const { user } = useAuth();
@@ -18,14 +18,10 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
     const [canGoBack, setCanGoBack] = useState(false);
     const [canGoForward, setCanGoForward] = useState(false);
 
-    // Reset WebView when tab is pressed (signaled by route.params.resetTs)
     useEffect(() => {
         if (route.params?.resetTs) {
             const resetUrl = `https://mwt.one/es/?option=com_sppagebuilder&view=page&id=90&user_id=${user?.id || ''}`;
-            // Create a new request to reload to the initial URL
             const redirectToDashboard = () => {
-                // Try to load the initial URL.
-                // We add a timestamp to force reload if needed, or just use the base URL
                 webViewRef.current?.injectJavaScript(`window.location.href = '${resetUrl}'; true;`);
             };
             redirectToDashboard();
@@ -36,13 +32,11 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
         if (event.nativeEvent.state === State.END) {
             const { translationX } = event.nativeEvent;
 
-            // Swipe Left (translationX < 0) -> Go Back
             if (translationX < -50) {
                 if (canGoBack && webViewRef.current) {
                     webViewRef.current.goBack();
                 }
             }
-            // Swipe Right (translationX > 0) -> Go Forward
             else if (translationX > 50) {
                 if (canGoForward && webViewRef.current) {
                     webViewRef.current.goForward();
@@ -54,12 +48,12 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
     const webViewUrl = `https://mwt.one/es/?option=com_sppagebuilder&view=page&id=90&user_id=${user?.id || ''}`;
 
     const injectedJavaScript = React.useMemo(() => {
-        // Solo inyectar CSS si el modo oscuro está activo
+        // DARK MODE CSS - Combinado de OrderWebViewScreen y DetailWebViewScreen
         const darkModeCSS = `
             :root {
                 --mwt-primary: ${colors.primary};
                 --mwt-primary-2: ${colors.primary};
-                --mwt-deep: ${colors.text}; /* Para textos en dark mode */
+                --mwt-deep: ${colors.text};
                 --mwt-border: ${colors.border};
                 --mwt-bg: ${colors.card};
                 --mwt-text-muted: ${colors.subtext};
@@ -72,81 +66,240 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
                 color: ${colors.text} !important;
             }
 
-            /* Container Overrides */
+            /* ========================================
+               CONTAINERS - OrderWebViewScreen
+               ======================================== */
             #section-id-b8d672c4-9d06-4327-b643-ebd1a5483357,
             .rastreo-container {
                 background: ${colors.background} !important;
-                 padding: 0!important;
+                padding: 0!important;
             }
-            #dashboaurdusu, #sppb-addon-9298e07a-ca36-490a-913e-18857fd2685e, #sppb-addon-bc376713-717b-4abc-9d87-f8780867c95a, #sppb-addon-838b6719-f077-459f-a5d1-f5840fad6c82, #sppb-addon-38b8cdd4-2eb0-4a27-aa6c-0eb4061c457e{
+
+            #dashboaurdusu, 
+            #sppb-addon-9298e07a-ca36-490a-913e-18857fd2685e, 
+            #sppb-addon-bc376713-717b-4abc-9d87-f8780867c95a, 
+            #sppb-addon-838b6719-f077-459f-a5d1-f5840fad6c82, 
+            #sppb-addon-38b8cdd4-2eb0-4a27-aa6c-0eb4061c457e {
                 padding-top: 70px!important;
             }
+
             .rastreo-inner {
-                background-color:${colors.background} !important;
+                background-color: ${colors.background} !important;
                 color: ${colors.text} !important;
                 box-shadow: none !important;
                 border: 1px solid ${colors.border} !important;
-                 border-radius: 0px!important;
+                border-radius: 0px!important;
             }
 
-            /* Status Icons & Labels */
+            /* ========================================
+               CONTAINERS - DetailWebViewScreen
+               ======================================== */
+            .usuarios-container {
+                background: ${colors.background} !important;
+                padding: 0!important;
+            }
+
+            .usuarios-inner {
+                background-color: ${colors.card} !important;
+                color: ${colors.text} !important;
+                box-shadow: none !important;
+                border: 1px solid ${colors.border} !important;
+                border-radius: 0px!important;
+            }
+
+            /* ========================================
+               CARDS - DetailWebViewScreen
+               ======================================== */
+            .order-card, .order-card-cliente {
+                background-color: ${colors.card} !important;
+                border: 1px solid ${colors.border} !important;
+                color: ${colors.text} !important;
+                box-shadow: none !important;
+            }
+
+            .order-label-detail {
+                color: ${colors.text} !important;
+                background: transparent !important;
+            }
+
+            .order-value {
+                color: ${colors.text} !important;
+            }
+
+            .order-summary {
+                background: transparent !important;
+                border: 1px solid ${colors.border} !important;
+            }
+
+            /* ========================================
+               STATUS ICONS & LABELS
+               ======================================== */
             .status-label {
                 color: #fff !important;
             }
+
             .status-item:hover .status-label, 
             .status-item.active .status-label {
                 color: ${colors.primary} !important; 
             }
 
-            /* Forms */
+            .status-icon.icon-vacio {
+                filter: brightness(0) invert(1);
+                outline: none !important;
+                box-shadow: none !important;
+            }
+
+            .status-icon.icon-vacio,
+            .status-icon.icon-vacio::before,
+            .status-icon.icon-vacio::after {
+                border-left: none !important;
+                border: none !important;
+            }
+
+            .status-icon {
+                border-left: none !important;
+            }
+
+            .status-icon::before,
+            .status-icon::after {
+                display: none !important;
+            }
+
+            /* ========================================
+               FORMS & INPUTS
+               ======================================== */
             .form-label {
                 color: #fff !important;
             }
-            
-            .form-control {
+
+            .form-control,
+            input, 
+            select, 
+            textarea {
                 background-color: #202938 !important;
                 color: #9da6b5 !important;
                 border: 1px solid #313a49 !important;
             }
-            .form-control:focus {
+
+            .form-control:focus,
+            input:focus, 
+            select:focus, 
+            textarea:focus {
                 border-color: ${colors.primary} !important;
             }
-            
-            /* Buttons */
-            .btn {
-                 color: #fff !important;
+
+            .order-input, 
+            input.order-input,
+            .order-card .order-input, 
+            .order-card-cliente .order-input {
+                background-color: #202938 !important;
+                color: #9da6b5 !important;
+                border: 1px solid #313a49 !important;
             }
+
+            /* ========================================
+               BUTTONS
+               ======================================== */
+            .btn {
+                color: #fff !important;
+            }
+
             .btn-danger {
                 background-color: #ef4444 !important;
             }
+
             .btn-dashboard, .btn-siguiente {
                 background-color: ${colors.primary} !important;
             }
+
             .btn-guardar {
-                background-color: ${colors.border} !important; /* Darker bg for secondary action */
+                background-color: ${colors.border} !important;
                 color: ${colors.text} !important;
             }
-            
-            /* Upload Zone */
+
+            .btn-nuevo {
+                background: ${colors.primary} !important;
+                color: #fff !important;
+            }
+            .btn-nuevo:hover {
+                background: ${colors.primary} !important;
+                opacity: 0.8;
+            }
+
+            .btn-back {
+                background: transparent !important;
+                border: 2px solid ${colors.primary} !important;
+                color: ${colors.primary} !important;
+            }
+            .btn-back:hover {
+                background: ${colors.primary} !important;
+                color: #fff !important;
+            }
+
+            .btn-home {
+                background: ${colors.border} !important;
+                color: ${colors.text} !important;
+                border: 1px solid ${colors.border} !important;
+            }
+            .btn-home:hover {
+                background: ${colors.card} !important;
+                border-color: ${colors.primary} !important;
+            }
+
+            /* ========================================
+               UPLOAD ZONE
+               ======================================== */
             .upload-zone {
                 background-color: ${colors.background} !important;
                 border-color: ${colors.primary} !important;
                 color: ${colors.text} !important;
             }
+
             .upload-title, .upload-meta {
                 color: ${colors.text} !important;
             }
 
-            /* Radio Group */
+            /* ========================================
+               RADIO GROUP
+               ======================================== */
             .radio-inline {
                 color: ${colors.text} !important;
             }
+
             .radio-with-icon {
                 background-color: #fff !important;
                 border-color: ${colors.border} !important;
             }
-            
-            /* Ocultar header/footer */
+
+            /* ========================================
+               TEXT ELEMENTS
+               ======================================== */
+            p, span, label, div, td, th {
+                color: ${colors.text} !important;
+            }
+
+            .usuarios-title, .usuarios-header h1 {
+                color: ${colors.text} !important;
+            }
+
+            /* ========================================
+               LINKS
+               ======================================== */
+            a {
+                color: ${colors.primary} !important;
+            }
+
+            a.btn {
+                text-decoration: none !important;
+            }
+
+            div.preforma-preview a {
+                background-color: #fff !important;
+            }
+
+            /* ========================================
+               HIDE ELEMENTS
+               ======================================== */
             #sp-header, #sp-footer {
                 display: none !important;
                 visibility: hidden !important;
@@ -156,70 +309,54 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
                 position: absolute !important;
                 top: -9999px !important;
             }
-                .btn.btn-home, .btn-back {
-       display: none  !important;
-  }
-       .btn-dashboard{
-       display: none  !important;
-  }
-       div.preforma-preview a{
-       background-color: #fff !important;
-  }
-       /* Convierte los iconos de status a blanco */
-.status-icon.icon-vacio {
-    filter: brightness(0) invert(1);
-}
-    /* Opción 1: Eliminar bordes izquierdos */
-.status-icon.icon-vacio,
-.status-icon.icon-vacio::before,
-.status-icon.icon-vacio::after {
-    border-left: none !important;
-    border: none !important;
-}
 
-/* Opción 2: Si es del contenedor padre */
-.status-icon {
-    border-left: none !important;
-}
-
-/* Opción 3: Si hay un pseudo-elemento causando la línea */
-.status-icon::before,
-.status-icon::after {
-    display: none !important;
-}
-
-/* Opción 4: Eliminar cualquier outline o box-shadow */
-.status-icon.icon-vacio {
-    outline: none !important;
-    box-shadow: none !important;
-}
-
-
+            .btn.btn-home, 
+            .btn-back,
+            .btn-dashboard,
+            .usuarios-title {
+                display: none !important;
+            }
+            .dashboard-cardp,
+            .dashboard-card.sku-card,
+            .dashboard-cardpro,
+            .dashboard-card2{
+             background: ${colors.card}  !important;
+             }
         `;
+
         // CSS para modo claro (Light Mode)
         const lightModeCSS = `
-        @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
-        @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
-        #section-id-b8d672c4-9d06-4327-b643-ebd1a5483357, .rastreo-container{
-       background: ${colors.background}  !important;
-       padding: 0!important;
-  }
-          #dashboaurdusu, #sppb-addon-9298e07a-ca36-490a-913e-18857fd2685e, #sppb-addon-bc376713-717b-4abc-9d87-f8780867c95a, #sppb-addon-838b6719-f077-459f-a5d1-f5840fad6c82, #sppb-addon-38b8cdd4-2eb0-4a27-aa6c-0eb4061c457e{
-       padding-top: 70px!important;
-  }
-        .rastreo-inner {
-                 border-radius: 0px!important;
+            @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
+            @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
+            
+            #section-id-b8d672c4-9d06-4327-b643-ebd1a5483357, 
+            .rastreo-container {
+                background: ${colors.background} !important;
+                padding: 0!important;
             }
-       .order-summary {
-       background: transparent  !important;
-  }
-       .btn.btn-home, .btn-back {
-       display: none  !important;
-  }
-       .btn-dashboard{
-       display: none  !important;
-  }
-    `;
+
+            #dashboaurdusu, 
+            #sppb-addon-9298e07a-ca36-490a-913e-18857fd2685e, 
+            #sppb-addon-bc376713-717b-4abc-9d87-f8780867c95a, 
+            #sppb-addon-838b6719-f077-459f-a5d1-f5840fad6c82, 
+            #sppb-addon-38b8cdd4-2eb0-4a27-aa6c-0eb4061c457e {
+                padding-top: 70px!important;
+            }
+
+            .rastreo-inner {
+                border-radius: 0px!important;
+            }
+
+            .order-summary {
+                background: transparent !important;
+            }
+
+            .btn.btn-home, 
+            .btn-back,
+            .btn-dashboard {
+                display: none !important;
+            }
+        `;
 
         // Seleccionar CSS según el tema
         const css = theme === 'dark' ? darkModeCSS : lightModeCSS;
@@ -268,10 +405,11 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
         <GestureHandlerRootView style={{ flex: 1 }}>
             <PanGestureHandler
                 onHandlerStateChange={onHandlerStateChange}
-                activeOffsetX={[-20, 20]} // Reduce sensitivity slightly
+                activeOffsetX={[-20, 20]}
+                activeOffsetY={[-50, 50]}
+                failOffsetY={[-50, 50]}
             >
                 <View style={styles.container}>
-                    {/* Header - only show if navigated from somewhere (not from tab) */}
                     {orderNumber && (
                         <View style={styles.header}>
                             <TouchableOpacity onPress={() => navigation.goBack()} style={styles.backButton}>
@@ -284,7 +422,6 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
                         </View>
                     )}
 
-                    {/* WebView */}
                     <WebView
                         ref={webViewRef}
                         source={{ uri: webViewUrl }}
@@ -309,7 +446,6 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
                         )}
                     />
 
-                    {/* Error State */}
                     {error && (
                         <View style={styles.errorContainer}>
                             <Ionicons name="alert-circle" size={64} color={colors.subtext} />
@@ -329,14 +465,13 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
                         </View>
                     )}
 
-                    {/* Loading Overlay */}
                     {loading && !error && (
                         <View style={styles.loadingOverlay}>
                             <ActivityIndicator size="large" color={colors.primary} />
                             <Text style={styles.loadingText}>Cargando...</Text>
                         </View>
                     )}
-                </View >
+                </View>
             </PanGestureHandler>
         </GestureHandlerRootView>
     );
