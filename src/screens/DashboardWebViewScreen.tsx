@@ -332,9 +332,15 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
             .dashboard-cardp,
             .dashboard-card.sku-card,
             .dashboard-cardpro,
-            .dashboard-card2{
+            .dashboard-card2,
+            .dashboard-cardp2,
+            .dashboard-card,
+            .archive-modal-content{
              background: ${colors.card}  !important;
              }
+             .orders-list li:hover {
+                background: ${colors.card}!important;
+            }
         `;
 
         // CSS para modo claro (Light Mode)
@@ -436,6 +442,7 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
                     )}
 
                     <WebView
+                        key={theme}
                         ref={webViewRef}
                         source={{ uri: webViewUrl }}
                         style={styles.webview}

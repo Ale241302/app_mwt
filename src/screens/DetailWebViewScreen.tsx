@@ -289,6 +289,7 @@ export default function OrderWebViewScreen({ route, navigation }: any) {
 
                     {/* WebView */}
                     <WebView
+                        key={theme}
                         ref={webViewRef}
                         source={{ uri: webViewUrl }}
                         style={styles.webview}
