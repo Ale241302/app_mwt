@@ -92,7 +92,27 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
             #sppb-addon-9298e07a-ca36-490a-913e-18857fd2685e, 
             #sppb-addon-bc376713-717b-4abc-9d87-f8780867c95a, 
             #sppb-addon-838b6719-f077-459f-a5d1-f5840fad6c82, 
-            #sppb-addon-38b8cdd4-2eb0-4a27-aa6c-0eb4061c457e {
+            #sppb-addon-38b8cdd4-2eb0-4a27-aa6c-0eb4061c457e,
+            #sppb-addon-6d780617-3a21-4cd4-a3f0-2205515a579d,
+            #sppb-addon-211d34f5-9c42-4b55-8470-e412ed61948a,
+            #sppb-addon-5d0aaa43-c6ec-4949-9c70-f1e6fe5ca9bc,
+            #sppb-addon-f3f934cc-5090-43f7-9ed1-a46b238e0cff,
+            #sppb-addon-d6311c13-3970-4b51-b32c-4cc2b13f19c6,
+            #sppb-addon-62c21837-0b34-49fd-9451-647992e6fe77,
+            #sppb-addon-a61fe62d-a545-4b77-8ec3-4879c68ac313,
+            #sppb-addon-f2151aae-a2bc-46cb-9e85-7dea15199500,
+            #sppb-addon-0137118a-1384-470a-b865-378be0575f9f,
+            #sppb-addon-abbf7b4d-802b-4f75-8d96-53b3b3db342a,
+            #sppb-addon-f6e5f75f-7b5d-4f50-a800-c53d8eb0c665,
+            #sppb-addon-8ce775d8-6cf3-4f9f-b22a-7ef6e59fa8c7,
+            #sppb-addon-cbffffd4-b5a6-40c9-946c-1ff7924f0a75,
+            #sppb-addon-d061167a-14ae-4f36-83f6-28f69a8ebc0e,
+            #sppb-addon-6de6438d-9fef-42d3-82cc-c97d6af12d68,
+            #sppb-addon-899add02-005a-43c4-abff-3028aff06175,
+            #sppb-addon-064878c3-24e4-48fb-ad7a-b47a20cbec62,
+            #sppb-addon-22c98b9f-17eb-43a5-9e54-583315aabfaf,
+            #sppb-addon-31f460d5-8e82-4a87-a782-4c1ac955099d,
+            #sppb-addon-1fddfe38-fa0a-4c42-90c3-40a00f9182a5 {
                 padding-top: 70px!important;
             }
 
@@ -348,17 +368,50 @@ export default function DashboardWebViewScreen({ route, navigation }: any) {
             @import url('https://fonts.googleapis.com/css2?family=Open+Sans:wght@400;600;700&display=swap');
             @import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap');
             
-            #section-id-b8d672c4-9d06-4327-b643-ebd1a5483357, 
-            .rastreo-container {
+            #section-id-b8d672c4-9d06-4327-b643-ebd1a5483357,
+            .rastreo-container,.usuarios-container, .order-summary {
                 background: ${colors.background} !important;
                 padding: 0!important;
             }
-
+             .order-summary {
+                    background: transparent  !important;
+                }
+            .btn.btn-home, .btn-back {
+            display: none  !important;
+        }
+            .usuarios-inner {
+            border-radius: 0px!important;
+        }
+            .usuarios-title{
+            display: none  !important;
+        }
             #dashboaurdusu, 
             #sppb-addon-9298e07a-ca36-490a-913e-18857fd2685e, 
             #sppb-addon-bc376713-717b-4abc-9d87-f8780867c95a, 
             #sppb-addon-838b6719-f077-459f-a5d1-f5840fad6c82, 
-            #sppb-addon-38b8cdd4-2eb0-4a27-aa6c-0eb4061c457e {
+            #sppb-addon-38b8cdd4-2eb0-4a27-aa6c-0eb4061c457e,
+            #sppb-addon-6d780617-3a21-4cd4-a3f0-2205515a579d,
+            #sppb-addon-211d34f5-9c42-4b55-8470-e412ed61948a,
+            #sppb-addon-5d0aaa43-c6ec-4949-9c70-f1e6fe5ca9bc,
+            #sppb-addon-f3f934cc-5090-43f7-9ed1-a46b238e0cff,
+            #sppb-addon-d6311c13-3970-4b51-b32c-4cc2b13f19c6,
+            #sppb-addon-62c21837-0b34-49fd-9451-647992e6fe77,
+            #sppb-addon-a61fe62d-a545-4b77-8ec3-4879c68ac313,
+            #sppb-addon-f2151aae-a2bc-46cb-9e85-7dea15199500,
+            #sppb-addon-0137118a-1384-470a-b865-378be0575f9f,
+            #sppb-addon-abbf7b4d-802b-4f75-8d96-53b3b3db342a,
+            #sppb-addon-f6e5f75f-7b5d-4f50-a800-c53d8eb0c665,
+            #sppb-addon-8ce775d8-6cf3-4f9f-b22a-7ef6e59fa8c7,
+            #sppb-addon-cbffffd4-b5a6-40c9-946c-1ff7924f0a75,
+            #sppb-addon-d061167a-14ae-4f36-83f6-28f69a8ebc0e,
+            #sppb-addon-6de6438d-9fef-42d3-82cc-c97d6af12d68,
+            #sppb-addon-899add02-005a-43c4-abff-3028aff06175,
+            #sppb-addon-064878c3-24e4-48fb-ad7a-b47a20cbec62,
+            #sppb-addon-22c98b9f-17eb-43a5-9e54-583315aabfaf,
+            #sppb-addon-31f460d5-8e82-4a87-a782-4c1ac955099d,
+            #sppb-addon-1fddfe38-fa0a-4c42-90c3-40a00f9182a5,
+            #sppb-addon-52705911-e7f5-47e0-a825-80a9c3b82cdf,
+            #sppb-addon-be1d9f6c-7fd7-4cd8-b59c-9f8bc9354829 {
                 padding-top: 70px!important;
             }
 
