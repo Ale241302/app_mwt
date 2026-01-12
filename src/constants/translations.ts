@@ -365,6 +365,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Tu Pedido': 'Your Order',
         'Buscar pedido...': 'Search order...',
         'OC': 'PO', // Purchase Order
+        'Año': 'Year',
+        'Estados': 'Statuses',
         'SAP': 'SAP',
         'Proforma': 'Proforma',
         'Proforma Muito Work': 'MWT Proforma',
@@ -474,6 +476,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Tu Pedido': 'Votre Commande',
         'Buscar pedido...': 'Rechercher commande...',
         'OC': 'BC', // Bon de Commande
+        'Año': 'Année',
+        'Estados': 'Statuts',
         'SAP': 'SAP',
         'Proforma': 'Proforma',
         'Proforma Muito Work': 'Proforma MWT',
@@ -583,6 +587,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Tu Pedido': 'Seu Pedido',
         'Buscar pedido...': 'Buscar pedido...',
         'OC': 'OC', // Ordem de Compra
+        'Año': 'Ano',
+        'Estados': 'Status',
         'SAP': 'SAP',
         'Proforma': 'Proforma',
         'Proforma Muito Work': 'Proforma MWT',

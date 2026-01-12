@@ -19,6 +19,7 @@ interface Order {
     prod_fechai: string; // Producción
     cust_customer_name: string; // Cliente
     operado_mwt: string; // Operador (0 = Cliente, 1 = Muito Work Limitada)
+    order_year: string;
 }
 
 import BinocularsIcon from '../components/BinocularsIcon';
@@ -26,8 +27,8 @@ import BinocularsIcon from '../components/BinocularsIcon';
 // Normalize status to allow translation keys (no grouping)
 const normalizeStatus = (status: string): string => {
     const map: Record<string, string> = {
-        'credito': 'Crédito',
-        'confirmed': 'Confirmado',
+        'credito': 'Creación', // Was 'Crédito'
+        'confirmed': 'Creación', // Was 'Confirmado'
         'produccion': 'Producción',
         'preparacion': 'Preparación',
         'despacho': 'Despacho',
@@ -56,11 +57,11 @@ export default function OrdersScreen() {
     const [modalVisible, setModalVisible] = useState(false);
     const [selectedCustomers, setSelectedCustomers] = useState<string[]>([]);
     const [selectedStatusFilters, setSelectedStatusFilters] = useState<string[]>([]);
+    const [selectedYears, setSelectedYears] = useState<string[]>([]);
     const [selectedOperator, setSelectedOperator] = useState<string>(''); // '' = all, '0' = Cliente, '1' = Muito Work Limitada
 
     const STATUS_FILTERS: Record<string, string[]> = {
-        [t('Confirmado')]: ['confirmed'],
-        [t('Crédito')]: ['credito'],
+        [t('Creación')]: ['confirmed', 'credito'],
         [t('Producción')]: ['produccion'],
         [t('Preparación')]: ['preparacion'],
         [t('Despacho')]: ['despacho'],
@@ -145,8 +146,15 @@ export default function OrdersScreen() {
             );
         }
 
+        // 5. Year Filter
+        if (selectedYears.length > 0) {
+            result = result.filter(order =>
+                order.order_year && selectedYears.includes(order.order_year)
+            );
+        }
+
         setFilteredOrders(result);
-    }, [search, orders, selectedCustomers, selectedStatusFilters, selectedOperator]);
+    }, [search, orders, selectedCustomers, selectedStatusFilters, selectedOperator, selectedYears]);
 
     const onRefresh = () => {
         setRefreshing(true);
@@ -165,6 +173,14 @@ export default function OrdersScreen() {
             setSelectedCustomers(prev => prev.filter(c => c !== customer));
         } else {
             setSelectedCustomers(prev => [...prev, customer]);
+        }
+    };
+
+    const toggleYear = (year: string) => {
+        if (selectedYears.includes(year)) {
+            setSelectedYears(prev => prev.filter(y => y !== year));
+        } else {
+            setSelectedYears(prev => [...prev, year]);
         }
     };
 
@@ -190,13 +206,17 @@ export default function OrdersScreen() {
         return Array.from(new Set(customers)).sort();
     };
 
+    const getUniqueYears = () => {
+        const years = orders.map(o => o.order_year).filter(y => y);
+        return Array.from(new Set(years)).sort((a, b) => b.localeCompare(a)); // Descending order
+    };
+
     // Check if user is administrator
     const isAdministrator = user?.group_titles?.includes('Administrator') || false;
 
     // Sort groups by custom order
     const statusOrder = [
-        'Confirmado',
-        'Crédito',
+        'Creación',
         'Producción',
         'Preparación',
         'Despacho',
@@ -298,7 +318,7 @@ export default function OrdersScreen() {
                                     {groupedOrders[status].map((order) => (
                                         <View key={order.order_id} style={styles.card}>
                                             <View style={styles.cardHeader}>
-                                                <Text style={styles.orderNumber}>{order.order_number}</Text>
+                                                <Text style={styles.orderNumber}>{(order.preforma_number_purchase && order.preforma_number_purchase !== 'null') ? order.preforma_number_purchase : order.order_number}</Text>
                                                 <View style={styles.icons}>
                                                     <TouchableOpacity
                                                         style={styles.iconButton}
@@ -322,7 +342,7 @@ export default function OrdersScreen() {
                                                 {order.sap_number_preformar && order.sap_number_preformar !== 'null' && (
                                                     <Text style={styles.textRow}><Text style={styles.label}>{t('SAP')}: </Text>{order.sap_number_preformar}</Text>
                                                 )}
-                                                {order.sap_number_preforma_mwt && order.sap_number_preforma_mwt !== 'null' && (
+                                                {isAdministrator && order.sap_number_preforma_mwt && order.sap_number_preforma_mwt !== 'null' && (
                                                     <Text style={styles.textRow}><Text style={styles.label}>{t('Proforma Muito Work')}: </Text>{order.sap_number_preforma_mwt}</Text>
                                                 )}
                                                 {order.sap_number_preforma && order.sap_number_preforma !== 'null' && (
@@ -363,6 +383,25 @@ export default function OrdersScreen() {
                         </View>
 
                         <ScrollView style={styles.filterScroll} showsVerticalScrollIndicator={false}>
+                            <Text style={styles.filterCategoryTitle}>{t('Año')}</Text>
+                            <View style={{ marginBottom: 20 }}>
+                                {getUniqueYears().map(year => {
+                                    const isChecked = selectedYears.includes(year);
+                                    return (
+                                        <TouchableOpacity
+                                            key={year}
+                                            style={styles.filterOption}
+                                            onPress={() => toggleYear(year)}
+                                        >
+                                            <View style={[styles.checkbox, isChecked && styles.checkboxChecked]}>
+                                                {isChecked && <Ionicons name="checkmark" size={14} color="#fff" />}
+                                            </View>
+                                            <Text style={styles.filterOptionText}>{year}</Text>
+                                        </TouchableOpacity>
+                                    );
+                                })}
+                            </View>
+
                             <Text style={styles.filterCategoryTitle}>{t('Estados')}</Text>
                             <View style={{ marginBottom: 20 }}>
                                 {Object.keys(STATUS_FILTERS).map(filter => {
