@@ -400,7 +400,7 @@ export default function CartScreen() {
                         {buyingNow ? (
                             <ActivityIndicator color="#fff" />
                         ) : (
-                            <Text style={styles.buyButtonText}>{t('Comprar')}</Text>
+                            <Text style={styles.buyButtonText}>{t('Añadir pedido')}</Text>
                         )}
                     </TouchableOpacity>
                 </View>

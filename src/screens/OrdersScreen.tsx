@@ -20,6 +20,9 @@ interface Order {
     cust_customer_name: string; // Cliente
     operado_mwt: string; // Operador (0 = Cliente, 1 = Muito Work Limitada)
     order_year: string;
+    order_parent_id?: string;
+    preforma_number_purchase_parent?: string;
+    order_number_parent?: string;
 }
 
 import BinocularsIcon from '../components/BinocularsIcon';
@@ -318,7 +321,16 @@ export default function OrdersScreen() {
                                     {groupedOrders[status].map((order) => (
                                         <View key={order.order_id} style={styles.card}>
                                             <View style={styles.cardHeader}>
-                                                <Text style={styles.orderNumber}>{(order.preforma_number_purchase && order.preforma_number_purchase !== 'null') ? order.preforma_number_purchase : order.order_number}</Text>
+                                                <Text style={styles.orderNumber}>
+                                                    {!isAdministrator
+                                                        ? ((order.preforma_number_purchase && order.preforma_number_purchase !== 'null') ? order.preforma_number_purchase : order.order_number)
+                                                        : ((order.sap_number_preforma && order.sap_number_preforma !== 'null')
+                                                            ? order.sap_number_preforma
+                                                            : ((order.sap_number_preforma_mwt && order.sap_number_preforma_mwt !== 'null')
+                                                                ? order.sap_number_preforma_mwt
+                                                                : order.order_number))
+                                                    }
+                                                </Text>
                                                 <View style={styles.icons}>
                                                     <TouchableOpacity
                                                         style={styles.iconButton}
@@ -338,6 +350,12 @@ export default function OrdersScreen() {
                                             <View style={styles.cardBody}>
                                                 {order.preforma_number_purchase && order.preforma_number_purchase !== 'null' && (
                                                     <Text style={styles.textRow}><Text style={styles.label}>{t('OC')}: </Text>{order.preforma_number_purchase}</Text>
+                                                )}
+                                                {order.order_parent_id && order.order_parent_id !== '0' && (
+                                                    <Text style={styles.textRow}>
+                                                        <Text style={styles.label}>{t('Orden padre')}: </Text>
+                                                        {(order.preforma_number_purchase_parent || order.order_number_parent || t('Sin preforma padre'))}
+                                                    </Text>
                                                 )}
                                                 {order.sap_number_preformar && order.sap_number_preformar !== 'null' && (
                                                     <Text style={styles.textRow}><Text style={styles.label}>{t('SAP')}: </Text>{order.sap_number_preformar}</Text>

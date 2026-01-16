@@ -203,6 +203,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Total': 'Total',
         'Subtotal': 'Subtotal',
         'Confirmar Pedido': 'Confirmar Pedido',
+        'Añadir pedido': 'Añadir pedido',
         'Eliminar': 'Eliminar',
         'Confirmar': 'Confirmar',
         '¿Eliminar este producto?': '¿Eliminar este producto?',
@@ -229,6 +230,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Pedido': 'Pedido',
         'Fecha': 'Fecha',
         'Estado': 'Estado',
+        'Orden padre': 'Orden padre',
+        'Sin preforma padre': 'Sin preforma padre',
         'Ver detalle': 'Ver detalle',
 
         // LoginScreen
@@ -329,6 +332,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Pedido': 'Order',
         'Fecha': 'Date',
         'Estado': 'Status',
+        'Orden padre': 'Parent Order',
+        'Sin preforma padre': 'No parent proforma',
         'Ver detalle': 'View details',
 
         // LoginScreen
@@ -371,6 +376,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Proforma': 'Proforma',
         'Proforma Muito Work': 'MWT Proforma',
         'Comprar': 'Checkout',
+        'Añadir pedido': 'Add Order',
         'Cant Total': 'Total Qty',
         'un.': 'ea.', // each
     },
@@ -440,6 +446,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Pedido': 'Commande',
         'Fecha': 'Date',
         'Estado': 'Statut',
+        'Orden padre': 'Commande Parente',
+        'Sin preforma padre': 'Aucune préforme parente',
         'Ver detalle': 'Voir détails',
 
         // LoginScreen
@@ -482,6 +490,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Proforma': 'Proforma',
         'Proforma Muito Work': 'Proforma MWT',
         'Comprar': 'Commander',
+        'Añadir pedido': 'Ajouter une commande',
         'Cant Total': 'Qté Totale',
         'un.': 'un.',
     },
@@ -551,6 +560,8 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Pedido': 'Pedido',
         'Fecha': 'Data',
         'Estado': 'Status',
+        'Orden padre': 'Pedido Pai',
+        'Sin preforma padre': 'Sem pré-forma pai',
         'Ver detalle': 'Ver detalhes',
 
         // LoginScreen
@@ -593,6 +604,7 @@ export const TRANSLATIONS: Record<Language, Record<string, string>> = {
         'Proforma': 'Proforma',
         'Proforma Muito Work': 'Proforma MWT',
         'Comprar': 'Comprar',
+        'Añadir pedido': 'Adicionar pedido',
         'Cant Total': 'Qtd Total',
         'un.': 'un.',
     },
