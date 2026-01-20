@@ -353,39 +353,125 @@ export default function ProductDetailScreen({ route, navigation }: any) {
                         <Text style={styles.specsTitle}>{t('Especificaciones')}</Text>
 
                         <View style={styles.iconsContainer}>
-                            {Array.from(uniqueIconsMap.entries()).map(([url, text], index) => (
-                                <TouchableOpacity
-                                    key={index}
-                                    style={[
-                                        styles.iconWrapper,
-                                        selectedSpecText === fixText(text) && styles.iconWrapperSelected,
-                                        isDark && { backgroundColor: 'transparent', borderWidth: 0 }
-                                    ]}
-                                    onPress={() => setSelectedSpecText(fixText(text))}
-                                >
-                                    <AttributeIcon
-                                        uri={url}
-                                        isDark={isDark}
-                                        style={styles.specIcon}
-                                    />
-                                </TouchableOpacity>
-                            ))}
+                            {(() => {
+                                const categories = [
+                                    { key: 'product_calzado', label: 'Tipo Calzado' },
+                                    { key: 'product_puntera', label: 'Tipo Puntera' },
+                                    { key: 'product_suela', label: 'Suela' },
+                                    { key: 'product_capellado', label: 'Capellada' },
+                                    { key: 'product_antiperforante', label: 'Antiperforante' },
+                                    { key: 'product_disipativo', label: 'Disipativo de Energía' },
+                                    { key: 'product_metatarsal', label: 'Protector Metatarsal' },
+                                    { key: 'product_cierre', label: 'Cierre' },
+                                    { key: 'product_normativa', label: 'Normativa' },
+                                    { key: 'product_segmento', label: 'Segmento' },
+                                    { key: 'product_riesgo', label: 'Riesgo' },
+                                    { key: 'producrt_riesgo', label: 'Riesgo' },
+                                    { key: 'product_componentes_reciclados', label: 'Materiales Economías Circulares' },
+                                    { key: 'product_cubrepuntera', label: 'Cubrepuntera' },
+                                    { key: 'product_plantilla', label: 'Plantilla Interna' }
+                                ];
+
+                                const specsMap = new Map<string, { text: string; category: string }>();
+
+                                categories.forEach(cat => {
+                                    // @ts-ignore
+                                    const attr = product[cat.key] as ProductAttribute[] | string;
+                                    const attrData = getAttributeData(attr);
+
+                                    attrData.forEach(item => {
+                                        if (item.url && item.text) {
+                                            if (!specsMap.has(item.url)) {
+                                                specsMap.set(item.url, {
+                                                    text: item.text,
+                                                    category: cat.label
+                                                });
+                                            }
+                                        }
+                                    });
+                                });
+
+                                const specsList = Array.from(specsMap.entries()).map(([url, data]) => ({
+                                    url,
+                                    text: data.text,
+                                    category: data.category
+                                }));
+
+                                return (
+                                    <>
+                                        <View style={styles.iconsContainer}>
+                                            {specsList.map((item, index) => (
+                                                <TouchableOpacity
+                                                    key={index}
+                                                    style={[
+                                                        styles.iconWrapper,
+                                                        selectedSpecText === fixText(item.text) && styles.iconWrapperSelected,
+                                                        isDark && { backgroundColor: 'transparent', borderWidth: 0 }
+                                                    ]}
+                                                    onPress={() => {
+                                                        setSelectedSpecText(fixText(item.text));
+                                                        // Update a ref or state for category if needed, OR find it dynamically
+                                                        // Since selectedSpecText is just text, we might have collisions if two cats have same text but different icons?
+                                                        // Better to store the whole selected object. But to minimize refactor, I'll find it by text or add state.
+                                                        // Actually, let's look up the category based on the *text* we just set, or better yet, make selectedSpecText store the whole item or use a new state.
+                                                        // For now, I'll search the map for the category corresponding to this text/url.
+                                                        // Ideally we should track "selectedUrl" to be unique.
+                                                        // setSelectedImageForSpec(item.url); // New state needed? Or just use URL to find correct entry?
+                                                    }}
+                                                >
+                                                    <AttributeIcon
+                                                        uri={item.url}
+                                                        isDark={isDark}
+                                                        style={styles.specIcon}
+                                                    />
+                                                </TouchableOpacity>
+                                            ))}
+                                        </View>
+
+                                        {(() => {
+                                            // Find selected item data to display Category + Value
+                                            // We need to track the URL to be precise, or Text.
+                                            // Let's assume we match by text for now as per previous logic, OR better: match by the finding the item in specsList that matches selectedSpecText
+                                            const selectedItem = specsList.find(i => fixText(i.text) === selectedSpecText);
+
+                                            if (selectedItem) {
+                                                return (
+                                                    <View style={styles.selectedSpecContainer}>
+                                                        {/* CATEGORY LEFT - VALUE RIGHT (or stacked as per user text?) 
+                                                            "a la izquierda debe decir el nombre de la categoria" implies: [Category] [Value]
+                                                        */}
+                                                        <Text style={styles.specCategoryLabel}>{t(selectedItem.category).toUpperCase()}</Text>
+                                                        <Text style={styles.selectedSpecText}>{t(selectedItem.text)}</Text>
+                                                    </View>
+                                                );
+                                            }
+                                            return null;
+                                        })()}
+                                    </>
+                                );
+                            })()}
                         </View>
 
-                        {selectedSpecText && (
-                            <View style={styles.selectedSpecContainer}>
-                                <Text style={styles.selectedSpecText}>{selectedSpecText}</Text>
-                            </View>
-                        )}
+                        {/* Fallback for Color */}
+                        {(() => {
+                            let colorVal = '';
+                            const colorAttr = product.product_color;
+                            if (Array.isArray(colorAttr) && colorAttr.length > 0) {
+                                colorVal = colorAttr[0].text;
+                            } else if (typeof colorAttr === 'string') {
+                                colorVal = colorAttr;
+                            }
 
-                        {/* Fallback for Color (usually has no icon but implies visual) - keep as text if desired, or skip */}
-                        {getAttributeText(product.product_color) ? (
-                            <View style={styles.specItem}>
-                                <Text style={styles.specLabel}>{t('Color')}</Text>
-                                <Text style={styles.specValue}>{getAttributeText(product.product_color)}</Text>
-                            </View>
-                        ) : null}
-
+                            if (colorVal) {
+                                return (
+                                    <View style={styles.specItem}>
+                                        <Text style={styles.specLabel}>{t('Color')}</Text>
+                                        <Text style={styles.specValue}>{t(colorVal)}</Text>
+                                    </View>
+                                );
+                            }
+                            return null;
+                        })()}
                     </View>
                 </View>
 
@@ -630,14 +716,32 @@ const getStyles = (colors: any) => StyleSheet.create({
         height: 36,
     },
     selectedSpecContainer: {
+        // flexDirection: 'column', // Default
+        alignItems: 'flex-start',
         marginBottom: 10,
         backgroundColor: colors.card,
-        padding: 5,
-        borderRadius: 4,
-        alignSelf: 'flex-start',
+        padding: 10,
+        borderRadius: 8,
+        alignSelf: 'flex-start', // Or 'stretch' if full width desired
+        minWidth: 100, // Optional: give it some width like the image
+        borderWidth: 1,
+        borderColor: colors.border,
+        // Shadow for better visibility as per image
+        shadowColor: "#000",
+        shadowOffset: { width: 0, height: 2 },
+        shadowOpacity: 0.1,
+        shadowRadius: 2,
+        elevation: 2,
+    },
+    specCategoryLabel: {
+        fontSize: 12,
+        color: colors.primary,
+        fontWeight: 'bold',
+        marginBottom: 4, // Space between category and value
+        textTransform: 'uppercase',
     },
     selectedSpecText: {
-        fontSize: 12,
+        fontSize: 14,
         color: colors.text,
         fontWeight: 'bold',
     },

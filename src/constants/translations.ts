@@ -16,7 +16,7 @@ export const PRODUCT_TRANSLATIONS: Record<string, Record<Language, string>> = {
     'Zapato o Tenis': { es: 'Zapato o Tenis', en: 'Shoe or Sneaker', fr: 'Chaussure ou Basket', pt: 'Sapato ou Tênis' },
 
     // CUBREPUNTERA
-    'Cubrepuntera': { es: 'Cubrepuntera', en: 'Toe Cap Cover', fr: 'Couvre-embout', pt: 'Cobertura de Biqueira' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Si': { es: 'Sí', en: 'Yes', fr: 'Oui', pt: 'Sim' },
     'Sí': { es: 'Sí', en: 'Yes', fr: 'Oui', pt: 'Sim' },
     'No': { es: 'No', en: 'No', fr: 'Non', pt: 'Não' },
@@ -30,17 +30,17 @@ export const PRODUCT_TRANSLATIONS: Record<string, Record<Language, string>> = {
     'Citoplástico 200C': { es: 'Citoplástico 200C', en: 'Citoplastic 200C', fr: 'Citoplastique 200C', pt: 'Citoplástico 200C' },
 
     // ANTIPERFORANTE
-    'Antiperforante': { es: 'Antiperforante', en: 'Anti-Perforation', fr: 'Anti-Perforation', pt: 'Antiperfuração' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Acero 1100 N': { es: 'Acero 1100 N', en: 'Steel 1100 N', fr: 'Acier 1100 N', pt: 'Aço 1100 N' },
     'Textil 1100 N': { es: 'Textil 1100 N', en: 'Textile 1100 N', fr: 'Textile 1100 N', pt: 'Têxtil 1100 N' },
 
     // PROTECTOR METATARSAL
-    'Protector Metatarsal': { es: 'Protector Metatarsal', en: 'Metatarsal Guard', fr: 'Protection Métatarsienne', pt: 'Protetor Metatarsal' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Interno': { es: 'Interno', en: 'Internal', fr: 'Interne', pt: 'Interno' },
     'Externo': { es: 'Externo', en: 'External', fr: 'Externe', pt: 'Externo' },
 
     // CAPELLADA
-    'Capellada': { es: 'Capellada', en: 'Upper', fr: 'Tige', pt: 'Cabedal' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Cuero Carnaza': { es: 'Cuero Carnaza', en: 'Split Leather', fr: 'Cuir Refendu', pt: 'Couro Camurça' },
     'Cuero Plena Flor': { es: 'Cuero Plena Flor', en: 'Full Grain Leather', fr: 'Cuir Pleine Flor', pt: 'Couro Plena Flor' },
     'Cuero Plena Flor HIDRO': { es: 'Cuero Plena Flor HIDRO', en: 'Hydro Full Grain Leather', fr: 'Cuir Pleine Fleur HYDRO', pt: 'Couro Plena Flor HIDRO' },
@@ -55,27 +55,27 @@ export const PRODUCT_TRANSLATIONS: Record<string, Record<Language, string>> = {
     'Cuero Liso HIDRO Anti-llamas': { es: 'Cuero Liso HIDRO Anti-llamas', en: 'Hydro Smooth Flame-Retardant Leather', fr: 'Cuir Lisse HYDRO Anti-Flammes', pt: 'Couro Liso HIDRO Anti-Chamas' },
 
     // DISIPATIVO DE ENERGÍA
-    'Disipativo de Energía': { es: 'Disipativo de Energía', en: 'Energy Dissipation', fr: 'Dissipation d\'Énergie', pt: 'Dissipador de Energia' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'ISO 20345 14.000V': { es: 'ISO 20345 14.000V', en: 'ISO 20345 14,000V', fr: 'ISO 20345 14 000V', pt: 'ISO 20345 14.000V' },
     'ASTM 2413 18.000V': { es: 'ASTM 2413 18.000V', en: 'ASTM 2413 18,000V', fr: 'ASTM 2413 18 000V', pt: 'ASTM 2413 18.000V' },
     'ABNT NBR 16603-2017 500V': { es: 'ABNT NBR 16603-2017 500V', en: 'ABNT NBR 16603-2017 500V', fr: 'ABNT NBR 16603-2017 500V', pt: 'ABNT NBR 16603-2017 500V' },
     'ISO 20345 14.000V ANT Conductivo': { es: 'ISO 20345 14.000V ANT Conductivo', en: 'ISO 20345 14,000V ANT Conductive', fr: 'ISO 20345 14 000V ANT Conducteur', pt: 'ISO 20345 14.000V ANT Condutivo' },
 
     // SUELA
-    'Suela': { es: 'Suela', en: 'Sole', fr: 'Semelle', pt: 'Solado' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Bidensidad PU': { es: 'Bidensidad PU', en: 'Dual-Density PU', fr: 'PU Bidensité', pt: 'Bidensidade PU' },
     'Bidensidad PU Caucho': { es: 'Bidensidad PU Caucho', en: 'Dual-Density PU Rubber', fr: 'PU Caoutchouc Bidensité', pt: 'Bidensidade PU Borracha' },
     'Monodensidad Caucho': { es: 'Monodensidad Caucho', en: 'Single-Density Rubber', fr: 'Caoutchouc Monodensité', pt: 'Monodensidade Borracha' },
 
     // NORMATIVA
-    'Normativa': { es: 'Normativa', en: 'Standards', fr: 'Normes', pt: 'Normas' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'ASTM F2413': { es: 'ASTM F2413', en: 'ASTM F2413', fr: 'ASTM F2413', pt: 'ASTM F2413' },
     'ISO 20345': { es: 'ISO 20345', en: 'ISO 20345', fr: 'ISO 20345', pt: 'ISO 20345' },
     'ISO 20347': { es: 'ISO 20347', en: 'ISO 20347', fr: 'ISO 20347', pt: 'ISO 20347' },
     'ABNT NBR 16.603:2017 500V - SECO': { es: 'ABNT NBR 16.603:2017 500V - SECO', en: 'ABNT NBR 16.603:2017 500V - DRY', fr: 'ABNT NBR 16.603:2017 500V - SEC', pt: 'ABNT NBR 16.603:2017 500V - SECO' },
 
     // CIERRE
-    'Cierre': { es: 'Cierre', en: 'Closure', fr: 'Fermeture', pt: 'Fechamento' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Sin Cordones': { es: 'Sin Cordones', en: 'Laceless', fr: 'Sans Lacets', pt: 'Sem Cadarço' },
     'Con Cordones': { es: 'Con Cordones', en: 'Lace-Up', fr: 'Avec Lacets', pt: 'Com Cadarço' },
     'De meter': { es: 'De meter', en: 'Slip-On', fr: 'À Enfiler', pt: 'De Calçar' },
@@ -101,7 +101,7 @@ export const PRODUCT_TRANSLATIONS: Record<string, Record<Language, string>> = {
     'Amarillo': { es: 'Amarillo', en: 'Yellow', fr: 'Jaune', pt: 'Amarelo' },
 
     // SEGMENTO
-    'Segmento': { es: 'Segmento', en: 'Segment', fr: 'Segment', pt: 'Segmento' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Agrícola': { es: 'Agrícola', en: 'Agricultural', fr: 'Agricole', pt: 'Agrícola' },
     'Alimentaria': { es: 'Alimentaria', en: 'Food Industry', fr: 'Alimentaire', pt: 'Alimentícia' },
     'Producción': { es: 'Producción', en: 'Production', fr: 'Production', pt: 'Produção' },
@@ -125,17 +125,17 @@ export const PRODUCT_TRANSLATIONS: Record<string, Record<Language, string>> = {
     'Agroindustria': { es: 'Agroindustria', en: 'Agribusiness', fr: 'Agro-Industrie', pt: 'Agroindústria' },
 
     // ECONOMÍAS CIRCULARES
-    'Materiales Economías Circulares': { es: 'Materiales Economías Circulares', en: 'Circular Economy Materials', fr: 'Matériaux Économie Circulaire', pt: 'Materiais Economias Circulares' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Economías': { es: 'Economías', en: 'Economies', fr: 'Économies', pt: 'Economias' },
 
     // PLANTILLA INTERNA
-    'Plantilla Interna': { es: 'Plantilla Interna', en: 'Insole', fr: 'Semelle Intérieure', pt: 'Palmilha Interna' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Poliuretano': { es: 'Poliuretano', en: 'Polyurethane', fr: 'Polyuréthane', pt: 'Poliuretano' },
     'Etilvinilacetato': { es: 'Etilvinilacetato', en: 'Ethylene-Vinyl Acetate', fr: 'Éthylène-Acétate de Vinyle', pt: 'Etilvinilacetato' },
     'Etilvinilacetato ANT': { es: 'Etilvinilacetato ANT', en: 'Ethylene-Vinyl Acetate ANT', fr: 'Éthylène-Acétate de Vinyle ANT', pt: 'Etilvinilacetato ANT' },
 
     // RIESGOS
-    'Riesgo': { es: 'Riesgo', en: 'Risk', fr: 'Risque', pt: 'Risco' },
+    // Moved to CATEGORÍAS DE ESPECIFICACIONES
     'Riesgos': { es: 'Riesgos', en: 'Risks', fr: 'Risques', pt: 'Riscos' },
     'Alta Temperatura': { es: 'Alta Temperatura', en: 'High Temperature', fr: 'Haute Température', pt: 'Alta Temperatura' },
     'Ambiente Frio': { es: 'Ambiente Frío', en: 'Cold Environment', fr: 'Environnement Froid', pt: 'Ambiente Frio' },
@@ -159,6 +159,22 @@ export const PRODUCT_TRANSLATIONS: Record<string, Record<Language, string>> = {
     'Plantilla': { es: 'Plantilla', en: 'Insole', fr: 'Semelle', pt: 'Palmilha' },
     'Calzados': { es: 'Calzados', en: 'Footwear', fr: 'Chaussures', pt: 'Calçados' },
     'Punteras': { es: 'Punteras', en: 'Toe Caps', fr: 'Embouts', pt: 'Biqueiras' },
+
+    // CATEGORÍAS DE ESPECIFICACIONES (COMPLETO)
+    'Tipo Calzado': { es: 'Tipo Calzado', en: 'Footwear Type', fr: 'Type de Chaussure', pt: 'Tipo de Calçado' },
+    'Tipo Puntera': { es: 'Tipo Puntera', en: 'Toe Cap Type', fr: 'Type d\'Embout', pt: 'Tipo de Biqueira' },
+    'Suela': { es: 'Suela', en: 'Sole', fr: 'Semelle', pt: 'Solado' },
+    'Capellada': { es: 'Capellada', en: 'Upper', fr: 'Tige', pt: 'Cabedal' },
+    'Antiperforante': { es: 'Antiperforante', en: 'Anti-Perforation', fr: 'Anti-Perforation', pt: 'Antiperfuração' },
+    'Disipativo de Energía': { es: 'Disipativo de Energía', en: 'Energy Dissipation', fr: 'Dissipation d\'Énergie', pt: 'Dissipador de Energia' },
+    'Protector Metatarsal': { es: 'Protector Metatarsal', en: 'Metatarsal Guard', fr: 'Protection Métatarsienne', pt: 'Protetor Metatarsal' },
+    'Cierre': { es: 'Cierre', en: 'Closure', fr: 'Fermeture', pt: 'Fechamento' },
+    'Normativa': { es: 'Normativa', en: 'Standards', fr: 'Normes', pt: 'Normas' },
+    'Segmento': { es: 'Segmento', en: 'Segment', fr: 'Segment', pt: 'Segmento' },
+    'Riesgo': { es: 'Riesgo', en: 'Risk', fr: 'Risque', pt: 'Risco' },
+    'Materiales Economías Circulares': { es: 'Materiales Economías Circulares', en: 'Circular Economy Materials', fr: 'Matériaux Économie Circulaire', pt: 'Materiais Economias Circulares' },
+    'Cubrepuntera': { es: 'Cubrepuntera', en: 'Toe Cap Cover', fr: 'Couvre-embout', pt: 'Cobertura de Biqueira' },
+    'Plantilla Interna': { es: 'Plantilla Interna', en: 'Insole', fr: 'Semelle Intérieure', pt: 'Palmilha Interna' },
 };
 
 // UI Translations
